@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">Music-player-mvvm</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="music_image">It\'s the music image</string>
+    <string name="song_title">Song Title</string>
+    <string name="previous_song_button">Go to Previous Track</string>
+    <string name="play_or_pause_the_song_button">Stop the Track</string>
+    <string name="go_to_the_next_song_button">Go to the next song</string>
 </resources>

@@ -21,6 +21,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <provider
+            android:name=".SongProvider"
+            android:authorities="com.example.music_player_mvvm.provider"
+            android:exported="false"/>
     </application>
 
 </manifest>

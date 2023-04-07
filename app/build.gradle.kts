@@ -50,8 +50,15 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    // Kotlin
+    // Kotlin Navigation
     implementation("androidx.navigation:navigation-fragment-ktx:2.5.3")
     implementation("androidx.navigation:navigation-ui-ktx:2.5.3")
+    // ExoPlayer
+    implementation ("com.google.android.exoplayer:exoplayer:2.18.5")
+    // MotionLayout
+    implementation("androidx.constraintlayout:constraintlayout:2.2.0-alpha09")
+    implementation ("com.github.bumptech.glide:glide:4.12.0")
+    //Recyclerview
+    implementation("androidx.recyclerview:recyclerview:1.3.0")
 
 }

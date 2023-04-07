@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="height">300dp</dimen>
+    <dimen name="width">300dp</dimen>
+    <dimen name="text_title_size">24sp</dimen>
+    <dimen name="margin_start_seekbar">32dp</dimen>
+    <dimen name="margin_end_seekbar">32dp</dimen>
+    <dimen name="margin_top_image_song">50dp</dimen>
+    <dimen name="constraint_marginTop">20dp</dimen>
+    <dimen name="constrain_width_end">150dp</dimen>
+    <dimen name="constraint_height_end">150dp</dimen>
+    <dimen name="width_button">60dp</dimen>
+    <dimen name="height_button">60dp</dimen>
+    <dimen name="padding_button">8dp</dimen>
+    <dimen name="margin_bottom_button">20dp</dimen>
+    <dimen name="marginTop_title">16dp</dimen>
+</resources>
