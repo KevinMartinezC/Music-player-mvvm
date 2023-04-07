@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeScreenFragment">
+
+    <fragment
+        android:id="@+id/homeScreenFragment"
+        android:name="com.example.music_player_mvvm.HomeScreenFragment"
+        android:label="fragment_home_screen"
+        tools:layout="@layout/fragment_home_screen" >
+        <action
+            android:id="@+id/action_homeScreenFragment_to_playScreenFragment"
+            app:destination="@id/playScreenFragment" />
+        <action
+            android:id="@+id/action_homeScreenFragment_to_settingScreenFragment"
+            app:destination="@id/settingScreenFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/playScreenFragment"
+        android:name="com.example.music_player_mvvm.PlayScreenFragment"
+        android:label="fragment_play_screen"
+        tools:layout="@layout/fragment_play_screen" >
+        <action
+            android:id="@+id/action_playScreenFragment_to_settingScreenFragment"
+            app:destination="@id/settingScreenFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/settingScreenFragment"
+        android:name="com.example.music_player_mvvm.SettingScreenFragment"
+        android:label="fragment_setting_screen"
+        tools:layout="@layout/fragment_setting_screen" />
+</navigation>
