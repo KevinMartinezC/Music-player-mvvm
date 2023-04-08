@@ -8,9 +8,22 @@ import androidx.recyclerview.widget.RecyclerView
 
 
 class SongListAdapter(
-    private val songs: List<Song>,
+    private var songs: List<Song>,
     private val onSongClickListener: (Int) -> Unit
 ) : RecyclerView.Adapter<SongListAdapter.SongViewHolder>() {
+    private var selectedSongIndex: Int = -1
+
+    fun setSelectedSongIndex(index: Int) {
+        val previousIndex = selectedSongIndex
+        selectedSongIndex = index
+        notifyItemChanged(previousIndex)
+        notifyItemChanged(selectedSongIndex)
+    }
+
+    fun updateSongs(newSongs: List<Song>) {
+        songs = newSongs
+        notifyDataSetChanged()
+    }
 
     inner class SongViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById(android.R.id.text1)

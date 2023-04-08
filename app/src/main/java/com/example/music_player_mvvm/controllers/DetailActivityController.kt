@@ -1,26 +1,29 @@
-package com.example.musicplayer.ui.controllers
+package com.example.music_player_mvvm.controllers
 
 import android.net.Uri
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.widget.SeekBar
-import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.example.music_player_mvvm.MediaPlayerHolder
-import com.example.music_player_mvvm.PlayScreenFragment
+import com.example.music_player_mvvm.views.PlayScreenFragment
 import com.example.music_player_mvvm.Song
 import com.example.music_player_mvvm.views.DetailActivityView
+import com.example.music_player_mvvm.views.HomeScreenViewModel
 
 
 class DetailActivityController(
     private val view: DetailActivityView,
     private val fragment: Fragment,
-    private val songs: List<Song>
+    private val songs: List<Song>,
+    private val viewModel: HomeScreenViewModel
+
 
 ) {
-    var currentSongIndex: Int = 0
     var playbackPositionBeforeTransition: Int = 0
     private val handler = Handler(Looper.getMainLooper())
 
@@ -36,24 +39,34 @@ class DetailActivityController(
             }
         }
     }
+
     fun setupButtonClickListeners() {
         view.playPauseButton.setOnClickListener { onPlayPauseButtonClick() }
         view.previousButton.setOnClickListener { onPreviousButtonClick() }
         view.nextButton.setOnClickListener { onNextButtonClick() }
     }
 
-    fun initSongInfo() {
-        val args = fragment.arguments
-        val  songTitle = args?.getString(PlayScreenFragment.SONG_TITLE_KEY) ?: ""
+    fun initSongInfo(args: Bundle?) {
+
+        val songTitle = args?.getString(PlayScreenFragment.SONG_TITLE_KEY) ?: ""
+        val currentSongIndex = args?.getInt(PlayScreenFragment.CURRENT_SONG_INDEX_KEY) ?: 0
+        viewModel.updateCurrentSongIndex(currentSongIndex)
         view.songTitleTextView.text = songTitle
-        currentSongIndex = songs.indexOfFirst { it.title == songTitle }
         view.albumArtImageView.setImageURI(
             songs.getOrNull(currentSongIndex)?.albumArtUri ?: Uri.EMPTY
         )
+
         playSong()
     }
 
-    private fun playSong() {
+
+    private fun playSong(startPosition: Int = 0) {
+        val currentSongIndex = viewModel.currentSongIndex.value ?: return
+
+        if (songs.isEmpty() || currentSongIndex < 0 || currentSongIndex >= songs.size) {
+            return
+        }
+
         MediaPlayerHolder.mediaPlayer?.let { mediaPlayer ->
             if (mediaPlayer.isPlaying) {
                 mediaPlayer.stop()
@@ -64,7 +77,11 @@ class DetailActivityController(
 
             mediaPlayer.setDataSource(fragment.requireContext(), songUri)
             mediaPlayer.prepare()
+            mediaPlayer.seekTo(startPosition)
             mediaPlayer.start()
+            // Reset the playback position to 0 for each new song
+            viewModel.updatePlaybackPosition(0)
+            view.seekBar.progress = 0
             view.seekBar.max = mediaPlayer.duration
             handler.postDelayed(updateSeekBar, 1000)
 
@@ -72,25 +89,28 @@ class DetailActivityController(
         }
     }
 
+
     private fun onPreviousButtonClick() {
-        if (currentSongIndex > 0) {
-            currentSongIndex -= 1
-        } else {
-            currentSongIndex = songs.size - 1
+        val currentSongIndex = viewModel.currentSongIndex.value
+        if (currentSongIndex != null) {
+            val newIndex = if (currentSongIndex > 0) currentSongIndex - 1 else songs.size - 1
+            viewModel.updateCurrentSongIndex(newIndex)
+            playSong()
+            updateSongInfo()
         }
-        playSong()
-        updateSongInfo()
     }
 
     private fun onNextButtonClick() {
-        if (currentSongIndex < songs.size - 1) {
-            currentSongIndex += 1
-        } else {
-            currentSongIndex = 0
+        val currentSongIndex = viewModel.currentSongIndex.value
+        if (currentSongIndex != null) {
+            val newIndex = if (currentSongIndex < songs.size - 1) currentSongIndex + 1 else 0
+            Log.d("DetailActivityController", "newIndex: $newIndex")
+            viewModel.updateCurrentSongIndex(newIndex)
+            playSong()
+            updateSongInfo()
         }
-        playSong()
-        updateSongInfo()
     }
+
 
     private fun onPlayPauseButtonClick() {
         MediaPlayerHolder.mediaPlayer?.let { mediaPlayer ->
@@ -107,13 +127,18 @@ class DetailActivityController(
     }
 
     private fun updateSongInfo() {
+        val currentSongIndex = viewModel.currentSongIndex.value ?: return
+
+        if (currentSongIndex < 0 || currentSongIndex >= songs.size) {
+            return
+        }
         val songTitles = songs.map { it.title }
         val albumArts = songs.map { it.albumArtUri }
 
         view.songTitleTextView.text = songTitles[currentSongIndex]
         Glide.with(fragment).load(albumArts[currentSongIndex]).into(view.albumArtImageView)
-
     }
+
 
     /**
      * Sets up the SeekBar change listener, which handles user interactions with the SeekBar.
@@ -124,6 +149,7 @@ class DetailActivityController(
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
                     MediaPlayerHolder.mediaPlayer?.seekTo(progress)
+                    viewModel.updatePlaybackPosition(progress)
                 }
             }
 
@@ -157,6 +183,7 @@ class DetailActivityController(
                     mediaPlayer.stop()
                     mediaPlayer.reset()
 
+                    val currentSongIndex = viewModel.currentSongIndex.value ?: return
                     val songUri = songs[currentSongIndex].songUri
 
                     mediaPlayer.setDataSource(fragment.requireContext(), songUri)
@@ -167,9 +194,9 @@ class DetailActivityController(
                     view.seekBar.max = mediaPlayer.duration
                     handler.postDelayed(updateSeekBar, 1000)
                     view.playPauseButton.setImageResource(android.R.drawable.ic_media_pause)
-
                 }
             }
+
 
             override fun onTransitionTrigger(
                 motionLayout: MotionLayout?,
@@ -181,8 +208,4 @@ class DetailActivityController(
         })
     }
 
-    companion object {
-        const val SONG_TITLE_KEY_INTENT: String = "songTitle"
-        const val BASE_PATH: String = "android.resource://"
-    }
 }
