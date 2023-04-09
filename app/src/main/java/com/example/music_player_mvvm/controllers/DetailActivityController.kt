@@ -4,14 +4,17 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.widget.SeekBar
-import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModel
 import com.bumptech.glide.Glide
 import com.example.music_player_mvvm.MediaPlayerHolder
 import com.example.music_player_mvvm.PlayScreenFragment
 import com.example.music_player_mvvm.Song
 import com.example.music_player_mvvm.views.DetailActivityView
+
+
+
 
 
 class DetailActivityController(

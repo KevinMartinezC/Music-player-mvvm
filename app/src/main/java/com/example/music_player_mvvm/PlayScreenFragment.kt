@@ -10,6 +10,7 @@ import com.example.music_player_mvvm.views.DetailActivityView
 import com.example.musicplayer.ui.controllers.DetailActivityController
 
 
+
 class PlayScreenFragment : Fragment() {
     private lateinit var detailActivityView: DetailActivityView
     private lateinit var detailActivityController: DetailActivityController

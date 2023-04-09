@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.music_player_mvvm.databinding.FragmentHomeScreenBinding
 
 
-class HomeScreenFragment : Fragment() {
+class HomeScreenFragment : Fragment()  {
     private var currentSongIndex: Int = 0
     private lateinit var recyclerView: RecyclerView
     private lateinit var songs: List<Song>
