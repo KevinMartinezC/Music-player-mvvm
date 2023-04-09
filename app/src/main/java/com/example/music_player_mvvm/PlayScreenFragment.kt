@@ -10,33 +10,48 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
 import androidx.constraintlayout.motion.widget.MotionLayout
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
+import com.example.music_player_mvvm.controllers.PlayScreenViewModel
 import com.example.music_player_mvvm.databinding.FragmentPlayScreenBinding
 
 
 class PlayScreenFragment : Fragment() {
+    private lateinit var viewmodel: PlayScreenViewModel
 
     private var _binding: FragmentPlayScreenBinding? = null
     private val binding get() = _binding!!
-
-    private val handler = Handler(Looper.getMainLooper())
     private lateinit var songs: List<Song>
     var currentSongIndex: Int = 0
     var playbackPositionBeforeTransition: Int = 0
 
-    private val updateSeekBar = object : Runnable {
-        override fun run() {
-            MediaPlayerHolder.mediaPlayer?.let { mediaPlayer ->
-                binding.seekBar.progress = mediaPlayer.currentPosition
-                handler.postDelayed(this, 1000)
-            }
-        }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val viewmodel: PlayScreenViewModel by viewModels()
+        this.viewmodel = viewmodel
+
+        viewmodel.progress().observe(this, Observer {
+            binding.seekBar.progress = it
+        })
+
+        viewmodel.playPauseButton().observe(this, Observer { buttonDrawable ->
+            binding.playPauseButton.setImageResource(buttonDrawable)
+        })
+
+        viewmodel.songIndex().observe(this, Observer { newIndex ->
+            currentSongIndex = newIndex
+            playSong()
+            updateSongInfo()
+        })
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
         _binding = FragmentPlayScreenBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -71,6 +86,8 @@ class PlayScreenFragment : Fragment() {
     }
 
     private fun playSong() {
+        viewmodel.playSong()
+
         MediaPlayerHolder.mediaPlayer?.let { mediaPlayer ->
             if (mediaPlayer.isPlaying) {
                 mediaPlayer.stop()
@@ -81,43 +98,21 @@ class PlayScreenFragment : Fragment() {
             mediaPlayer.prepare()
             mediaPlayer.start()
             binding.seekBar.max = mediaPlayer.duration
-            handler.postDelayed(updateSeekBar, 1000)
+            // handler.postDelayed(updateSeekBar, 1000)
             binding.playPauseButton.setImageResource(android.R.drawable.ic_media_pause)
         }
     }
 
     private fun onPreviousButtonClick() {
-        if (currentSongIndex > 0) {
-            currentSongIndex -= 1
-        } else {
-            currentSongIndex = songs.size - 1
-        }
-        playSong()
-        updateSongInfo()
+        viewmodel.onPreviousButtonClick(songs)
     }
 
     private fun onNextButtonClick() {
-        if (currentSongIndex < songs.size - 1) {
-            currentSongIndex += 1
-        } else {
-            currentSongIndex = 0
-        }
-        playSong()
-        updateSongInfo()
+        viewmodel.onNextButtonClick(songs)
     }
 
     private fun onPlayPauseButtonClick() {
-        MediaPlayerHolder.mediaPlayer?.let { mediaPlayer ->
-            if (mediaPlayer.isPlaying) {
-                mediaPlayer.pause()
-                binding.playPauseButton.setImageResource(android.R.drawable.ic_media_play)
-                handler.removeCallbacks(updateSeekBar)
-            } else {
-                mediaPlayer.start()
-                binding.playPauseButton.setImageResource(android.R.drawable.ic_media_pause)
-                handler.postDelayed(updateSeekBar, 1000)
-            }
-        }
+        viewmodel.onPlayPauseButtonClick()
     }
 
     private fun updateSongInfo() {
@@ -175,7 +170,7 @@ class PlayScreenFragment : Fragment() {
                     mediaPlayer.seekTo(playbackPositionBeforeTransition)
                     mediaPlayer.start()
                     binding.seekBar.max = mediaPlayer.duration
-                    handler.postDelayed(updateSeekBar, 1000)
+                    //  handler.postDelayed(updateSeekBar, 1000)
                     binding.playPauseButton.setImageResource(android.R.drawable.ic_media_pause)
 
                 }
