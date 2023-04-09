@@ -8,6 +8,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,9 +21,12 @@ import com.example.music_player_mvvm.model.SongContract
 import com.example.music_player_mvvm.views.adapter.SongListAdapter
 import com.example.music_player_mvvm.model.SongRepository
 import com.example.music_player_mvvm.databinding.FragmentHomeScreenBinding
+import com.example.music_player_mvvm.viewmodel.HomeScreenViewModel
 
 
 class HomeScreenFragment : Fragment() {
+    private val viewmodel: HomeScreenViewModel by viewModels()
+
     private var currentSongIndex: Int = 0
     private lateinit var recyclerView: RecyclerView
     private lateinit var songs: List<Song>
@@ -39,10 +44,16 @@ class HomeScreenFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        songs = loadSongsFromProvider()
-        SongRepository.songs = songs
         initViews()
-        setupRecyclerView()
+
+        viewmodel.loadSongsFromProvider(requireActivity().contentResolver)
+
+        // Observe the songs LiveData and update the UI
+        viewmodel.songs().observe(viewLifecycleOwner, Observer { loadedSongs ->
+            songs = loadedSongs
+            SongRepository.songs = songs
+            setupRecyclerView()
+        })
     }
 
     private fun initViews() {
@@ -68,43 +79,6 @@ class HomeScreenFragment : Fragment() {
         navigateToDetailActivity(position)
     }
 
-    private fun loadSongsFromProvider(): List<Song> {
-        val songs = mutableListOf<Song>()
-        val projection = arrayOf(
-            SongContract.Columns.ID,
-            SongContract.Columns.SONG_NAME,
-            SongContract.Columns.SONG_URI,
-            SongContract.Columns.ALBUM_ART_URI
-        )
-
-        requireActivity().contentResolver.query(
-            SongContract.CONTENT_URI,
-            projection,
-            null,
-            null,
-            null
-        )
-            ?.use { cursor ->
-                if (cursor.moveToFirst()) {
-                    do {
-                        val titleIndex = cursor.getColumnIndex(SongContract.Columns.SONG_NAME)
-                        val songUriIndex = cursor.getColumnIndex(SongContract.Columns.SONG_URI)
-                        val albumArtUriIndex =
-                            cursor.getColumnIndex(SongContract.Columns.ALBUM_ART_URI)
-
-                        if (titleIndex >= 0 && songUriIndex >= 0 && albumArtUriIndex >= 0) {
-                            val title = cursor.getString(titleIndex)
-                            val songUri = Uri.parse(cursor.getString(songUriIndex))
-                            val albumArtUri = Uri.parse(cursor.getString(albumArtUriIndex))
-
-                            val song = Song(title, songUri, albumArtUri)
-                            songs.add(song)
-                        }
-                    } while (cursor.moveToNext())
-                }
-            }
-        return songs
-    }
     private fun playSelectedSong(position: Int) {
         MediaPlayerHolder.mediaPlayer?.release()
         currentSongIndex = position
