@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import android.widget.SeekBar
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
 import com.example.music_player_mvvm.model.media.MediaPlayerHolder
 import com.example.music_player_mvvm.model.Song
@@ -33,22 +32,22 @@ class PlayScreenFragment : Fragment() {
         val viewmodel: PlayScreenViewModel by viewModels()
         this.viewmodel = viewmodel
 
-        viewmodel.progress().observe(this, Observer {
+        viewmodel.progress().observe(this) {
             binding.seekBar.progress = it
-        })
+        }
 
-        viewmodel.playPauseButton().observe(this, Observer { buttonDrawable ->
+        viewmodel.playPauseButton().observe(this) { buttonDrawable ->
             binding.playPauseButton.setImageResource(buttonDrawable)
-        })
+        }
 
-        viewmodel.songIndex().observe(this, Observer { newIndex ->
+        viewmodel.songIndex().observe(this) { newIndex ->
             currentSongIndex = newIndex
             playSong()
-        })
+        }
 
-        viewmodel.currentSong().observe(this, Observer { currentSong ->
+        viewmodel.currentSong().observe(this) { currentSong ->
             updateSongInfo(currentSong)
-        })
+        }
     }
 
     override fun onCreateView(
@@ -85,9 +84,9 @@ class PlayScreenFragment : Fragment() {
     }
 
     private fun setupButtonClickListeners() {
-        binding.playPauseButton.setOnClickListener { onPlayPauseButtonClick() }
-        binding.previousButton.setOnClickListener { onPreviousButtonClick() }
-        binding.nextButton.setOnClickListener { onNextButtonClick() }
+        binding.playPauseButton.setOnClickListener { viewmodel.onPlayPauseButtonClick() }
+        binding.previousButton.setOnClickListener { viewmodel.onPreviousButtonClick(songs) }
+        binding.nextButton.setOnClickListener { viewmodel.onNextButtonClick(songs) }
     }
 
     private fun initSongInfo() {
@@ -118,19 +117,7 @@ class PlayScreenFragment : Fragment() {
             binding.playPauseButton.setImageResource(android.R.drawable.ic_media_pause)
         }
     }
-
-    private fun onPreviousButtonClick() {
-        viewmodel.onPreviousButtonClick(songs)
-    }
-
-    private fun onNextButtonClick() {
-        viewmodel.onNextButtonClick(songs)
-    }
-
-    private fun onPlayPauseButtonClick() {
-        viewmodel.onPlayPauseButtonClick()
-    }
-
+    
     private fun updateSongInfo(song: Song) {
         binding.songTitleTextView.text = song.title
         Glide.with(this).load(song.albumArtUri).into(binding.albumArtImageView)
@@ -158,6 +145,7 @@ class PlayScreenFragment : Fragment() {
                 endId: Int
             ) {
             }
+
             override fun onTransitionChange(
                 motionLayout: MotionLayout?,
                 startId: Int,
