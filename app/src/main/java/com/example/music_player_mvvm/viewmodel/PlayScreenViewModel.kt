@@ -1,14 +1,13 @@
-package com.example.music_player_mvvm.controllers
+package com.example.music_player_mvvm.viewmodel
 
 
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.music_player_mvvm.MediaPlayerHolder
-import com.example.music_player_mvvm.Song
+import com.example.music_player_mvvm.model.media.MediaPlayerHolder
+import com.example.music_player_mvvm.model.Song
 
 
 class PlayScreenViewModel : ViewModel() {
@@ -23,6 +22,17 @@ class PlayScreenViewModel : ViewModel() {
 
     private val songIndexMutableLiveData = MutableLiveData<Int>()
     fun songIndex(): LiveData<Int> = songIndexMutableLiveData
+
+    private val currentSongMutableLiveData = MutableLiveData<Song>()
+    fun currentSong(): LiveData<Song> = currentSongMutableLiveData
+
+    private val playbackPositionMutableLiveData = MutableLiveData<Int>()
+    val playbackPositionLiveData: LiveData<Int> = playbackPositionMutableLiveData
+
+
+    fun updatePlaybackPosition(position: Int) {
+        playbackPositionMutableLiveData.postValue(position)
+    }
 
     fun playSong() {
         handler.postDelayed(updateSeekBar, 1000)
@@ -60,6 +70,8 @@ class PlayScreenViewModel : ViewModel() {
             songs.size - 1
         }
         songIndexMutableLiveData.postValue(newSongIndex)
+        updateCurrentSong(songs, newSongIndex)
+
     }
 
     fun onNextButtonClick(songs: List<Song>) {
@@ -70,6 +82,13 @@ class PlayScreenViewModel : ViewModel() {
             0
         }
         songIndexMutableLiveData.postValue(newSongIndex)
+        updateCurrentSong(songs, newSongIndex)
+
+    }
+
+    private fun updateCurrentSong(songs: List<Song>, currentSongIndex: Int) {
+        val currentSong = songs.getOrNull(currentSongIndex)
+        currentSong?.let { currentSongMutableLiveData.postValue(it) }
     }
 
 }

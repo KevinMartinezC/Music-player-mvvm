@@ -1,10 +1,11 @@
-package com.example.music_player_mvvm
+package com.example.music_player_mvvm.model
 
 import android.content.ContentProvider
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.net.Uri
+import com.example.music_player_mvvm.R
 
 class SongProvider : ContentProvider() {
     private val songs = listOf(

@@ -1,4 +1,4 @@
-package com.example.music_player_mvvm
+package com.example.music_player_mvvm.views
 
 import android.media.MediaPlayer
 import android.net.Uri
@@ -12,6 +12,12 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.music_player_mvvm.model.media.MediaPlayerHolder
+import com.example.music_player_mvvm.R
+import com.example.music_player_mvvm.model.Song
+import com.example.music_player_mvvm.model.SongContract
+import com.example.music_player_mvvm.views.adapter.SongListAdapter
+import com.example.music_player_mvvm.model.SongRepository
 import com.example.music_player_mvvm.databinding.FragmentHomeScreenBinding
 
 

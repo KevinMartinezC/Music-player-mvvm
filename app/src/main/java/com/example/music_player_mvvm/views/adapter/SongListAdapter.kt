@@ -1,10 +1,11 @@
-package com.example.music_player_mvvm
+package com.example.music_player_mvvm.views.adapter
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.music_player_mvvm.model.Song
 
 
 class SongListAdapter(

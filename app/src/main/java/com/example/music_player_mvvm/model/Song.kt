@@ -1,4 +1,4 @@
-package com.example.music_player_mvvm
+package com.example.music_player_mvvm.model
 
 import android.net.Uri
 

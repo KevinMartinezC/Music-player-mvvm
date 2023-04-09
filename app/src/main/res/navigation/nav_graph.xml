@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/homeScreenFragment"
-        android:name="com.example.music_player_mvvm.HomeScreenFragment"
+        android:name="com.example.music_player_mvvm.views.HomeScreenFragment"
         android:label="fragment_home_screen"
         tools:layout="@layout/fragment_home_screen" >
         <action
@@ -19,7 +19,7 @@
     </fragment>
     <fragment
         android:id="@+id/playScreenFragment"
-        android:name="com.example.music_player_mvvm.PlayScreenFragment"
+        android:name="com.example.music_player_mvvm.views.PlayScreenFragment"
         android:label="fragment_play_screen"
         tools:layout="@layout/fragment_play_screen" >
         <action
@@ -28,7 +28,7 @@
     </fragment>
     <fragment
         android:id="@+id/settingScreenFragment"
-        android:name="com.example.music_player_mvvm.SettingScreenFragment"
+        android:name="com.example.music_player_mvvm.views.SettingScreenFragment"
         android:label="fragment_setting_screen"
         tools:layout="@layout/fragment_setting_screen" />
 </navigation>

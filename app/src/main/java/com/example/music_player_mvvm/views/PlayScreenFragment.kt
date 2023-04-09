@@ -1,9 +1,7 @@
-package com.example.music_player_mvvm
+package com.example.music_player_mvvm.views
 
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -13,7 +11,10 @@ import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
-import com.example.music_player_mvvm.controllers.PlayScreenViewModel
+import com.example.music_player_mvvm.model.media.MediaPlayerHolder
+import com.example.music_player_mvvm.model.Song
+import com.example.music_player_mvvm.model.SongRepository
+import com.example.music_player_mvvm.viewmodel.PlayScreenViewModel
 import com.example.music_player_mvvm.databinding.FragmentPlayScreenBinding
 
 
@@ -43,7 +44,10 @@ class PlayScreenFragment : Fragment() {
         viewmodel.songIndex().observe(this, Observer { newIndex ->
             currentSongIndex = newIndex
             playSong()
-            updateSongInfo()
+        })
+
+        viewmodel.currentSong().observe(this, Observer { currentSong ->
+            updateSongInfo(currentSong)
         })
     }
 
@@ -60,13 +64,25 @@ class PlayScreenFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
 
-        songs =  SongRepository.songs
+        songs = SongRepository.songs
         setupButtonClickListeners()
         initSongInfo()
         setupSeekBarChangeListener()
         setupMotionLayoutTransitionListener()
+
+        viewmodel.playbackPositionLiveData.observe(viewLifecycleOwner) { position ->
+            MediaPlayerHolder.mediaPlayer?.seekTo(position)
+        }
     }
 
+    override fun onStop() {
+        super.onStop()
+        MediaPlayerHolder.mediaPlayer.let { mediaPlayer ->
+            if (mediaPlayer != null) {
+                viewmodel.updatePlaybackPosition(mediaPlayer.currentPosition)
+            }
+        }
+    }
 
     private fun setupButtonClickListeners() {
         binding.playPauseButton.setOnClickListener { onPlayPauseButtonClick() }
@@ -115,13 +131,9 @@ class PlayScreenFragment : Fragment() {
         viewmodel.onPlayPauseButtonClick()
     }
 
-    private fun updateSongInfo() {
-        val songTitles = songs.map { it.title }
-        val albumArts = songs.map { it.albumArtUri }
-
-        binding.songTitleTextView.text = songTitles[currentSongIndex]
-        Glide.with(this).load(albumArts[currentSongIndex]).into(binding.albumArtImageView)
-
+    private fun updateSongInfo(song: Song) {
+        binding.songTitleTextView.text = song.title
+        Glide.with(this).load(song.albumArtUri).into(binding.albumArtImageView)
     }
 
     private fun setupSeekBarChangeListener() {
@@ -146,7 +158,6 @@ class PlayScreenFragment : Fragment() {
                 endId: Int
             ) {
             }
-
             override fun onTransitionChange(
                 motionLayout: MotionLayout?,
                 startId: Int,
@@ -188,6 +199,5 @@ class PlayScreenFragment : Fragment() {
 
     companion object {
         const val SONG_TITLE_KEY: String = "songTitle"
-
     }
 }
