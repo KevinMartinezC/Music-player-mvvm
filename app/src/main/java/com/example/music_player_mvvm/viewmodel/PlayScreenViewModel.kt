@@ -1,16 +1,22 @@
 package com.example.music_player_mvvm.viewmodel
 
 
+import android.app.Application
+import android.content.Intent
 import android.os.Handler
 import android.os.Looper
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.music_player_mvvm.model.media.MediaPlayerHolder
 import com.example.music_player_mvvm.model.Song
+import com.example.music_player_mvvm.views.PlayScreenFragment.Companion.SONG_TITLE_KEY
 
 
-class PlayScreenViewModel : ViewModel() {
+class PlayScreenViewModel(application: Application) : AndroidViewModel(application) {
+
 
     private val handler = Handler(Looper.getMainLooper())
 
@@ -86,9 +92,26 @@ class PlayScreenViewModel : ViewModel() {
 
     }
 
+
+    private fun sendSongChangedBroadcast(currentSong: Song) {
+        val intent = Intent(ACTION_SONG_CHANGED)
+        intent.putExtra("song_title", currentSong.title)
+        intent.putExtra("song_uri", currentSong.songUri.toString())
+        intent.putExtra("album_art_uri", currentSong.albumArtUri.toString())
+        LocalBroadcastManager.getInstance(getApplication()).sendBroadcast(intent)
+    }
+
     private fun updateCurrentSong(songs: List<Song>, currentSongIndex: Int) {
         val currentSong = songs.getOrNull(currentSongIndex)
-        currentSong?.let { currentSongMutableLiveData.postValue(it) }
+        currentSong?.let {
+            currentSongMutableLiveData.postValue(it)
+            sendSongChangedBroadcast(it)
+        }
+    }
+
+
+    companion object {
+        const val ACTION_SONG_CHANGED = "com.example.music_player_mvvm.ACTION_SONG_CHANGED"
     }
 
 }

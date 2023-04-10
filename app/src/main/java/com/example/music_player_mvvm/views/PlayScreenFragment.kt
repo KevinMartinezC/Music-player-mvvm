@@ -1,5 +1,9 @@
 package com.example.music_player_mvvm.views
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.net.Uri
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -7,8 +11,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.fragment.app.viewModels
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bumptech.glide.Glide
 import com.example.music_player_mvvm.model.media.MediaPlayerHolder
 import com.example.music_player_mvvm.model.Song
@@ -29,7 +35,11 @@ class PlayScreenFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val viewmodel: PlayScreenViewModel by viewModels()
+
+        val viewmodel: PlayScreenViewModel by viewModels {
+            PlayScreenViewModelFactory(requireActivity().application)
+        }
+
         this.viewmodel = viewmodel
 
         viewmodel.progress().observe(this) {
@@ -81,6 +91,34 @@ class PlayScreenFragment : Fragment() {
                 viewmodel.updatePlaybackPosition(mediaPlayer.currentPosition)
             }
         }
+    }
+
+    private val songChangedReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent != null && intent.action == PlayScreenViewModel.ACTION_SONG_CHANGED) {
+                val songTitle = intent.getStringExtra("song_title") ?: ""
+                val songUri = Uri.parse(intent.getStringExtra("song_uri") ?: "")
+                val albumArtUri = Uri.parse(intent.getStringExtra("album_art_uri") ?: "")
+                val song = Song(songTitle, songUri, albumArtUri)
+                updateSongInfo(song)
+
+                context?.let {
+                    Toast.makeText(it, "Song changed: $songTitle", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val filter = IntentFilter(PlayScreenViewModel.ACTION_SONG_CHANGED)
+        LocalBroadcastManager.getInstance(requireContext())
+            .registerReceiver(songChangedReceiver, filter)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(songChangedReceiver)
     }
 
     private fun setupButtonClickListeners() {
