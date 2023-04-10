@@ -5,4 +5,6 @@
     <string name="previous_song_button">Go to Previous Track</string>
     <string name="play_or_pause_the_song_button">Stop the Track</string>
     <string name="go_to_the_next_song_button">Go to the next song</string>
+    <string name="add_song">Add Song</string>
+    <string name="settings">Settings</string>
 </resources>

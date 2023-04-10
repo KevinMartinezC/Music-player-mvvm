@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -22,10 +23,12 @@ import com.example.music_player_mvvm.views.adapter.SongListAdapter
 import com.example.music_player_mvvm.model.SongRepository
 import com.example.music_player_mvvm.databinding.FragmentHomeScreenBinding
 import com.example.music_player_mvvm.viewmodel.HomeScreenViewModel
+import com.example.music_player_mvvm.viewmodel.SharedViewModel
 
 
 class HomeScreenFragment : Fragment() {
     private val viewmodel: HomeScreenViewModel by viewModels()
+    private val sharedViewModel: SharedViewModel by activityViewModels()
 
     private var currentSongIndex: Int = 0
     private lateinit var recyclerView: RecyclerView
@@ -54,10 +57,19 @@ class HomeScreenFragment : Fragment() {
             SongRepository.songs = songs
             setupRecyclerView()
         })
+
+        sharedViewModel.selectedSongs.observe(viewLifecycleOwner, Observer { selectedSongs ->
+            // Update the songs list with the selected songs
+            songs = selectedSongs
+            setupRecyclerView()
+        })
     }
 
     private fun initViews() {
         recyclerView = binding.recyclerView
+        binding.settingsButton.setOnClickListener {
+            findNavController().navigate(R.id.action_homeScreenFragment_to_settingScreenFragment)
+        }
     }
 
     private fun setupRecyclerView() {
