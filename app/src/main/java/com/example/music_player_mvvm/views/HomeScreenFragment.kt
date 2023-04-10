@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,12 +28,16 @@ import com.example.music_player_mvvm.viewmodel.SharedViewModel
 
 
 class HomeScreenFragment : Fragment() {
+    private var defaultSongs: List<Song> = listOf()
+
     private val viewmodel: HomeScreenViewModel by viewModels()
-    private val sharedViewModel: SharedViewModel by activityViewModels()
+    private val sharedViewModel: SharedViewModel by activityViewModels {
+        CustomViewModelFactory(SongRepository)
+    }
 
     private var currentSongIndex: Int = 0
     private lateinit var recyclerView: RecyclerView
-    private lateinit var songs: List<Song>
+    private var songs: MutableList<Song> = mutableListOf()
     private var _binding: FragmentHomeScreenBinding? = null
     private val binding get() = _binding!!
 
@@ -46,23 +51,18 @@ class HomeScreenFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        SongRepository.initialize(requireActivity())
 
         initViews()
 
         viewmodel.loadSongsFromProvider(requireActivity().contentResolver)
+        defaultSongs = SongRepository.getDefaultSongs()
 
-        // Observe the songs LiveData and update the UI
-        viewmodel.songs().observe(viewLifecycleOwner, Observer { loadedSongs ->
-            songs = loadedSongs
-            SongRepository.songs = songs
+        sharedViewModel.songs.observe(viewLifecycleOwner, Observer { newSongs ->
+            songs = newSongs.toMutableList()
             setupRecyclerView()
         })
 
-        sharedViewModel.selectedSongs.observe(viewLifecycleOwner, Observer { selectedSongs ->
-            // Update the songs list with the selected songs
-            songs = selectedSongs
-            setupRecyclerView()
-        })
     }
 
     private fun initViews() {

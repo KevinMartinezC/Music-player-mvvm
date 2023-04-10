@@ -13,16 +13,19 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.music_player_mvvm.R
-import com.example.music_player_mvvm.databinding.FragmentHomeScreenBinding
 import com.example.music_player_mvvm.databinding.FragmentSettingScreenBinding
 import com.example.music_player_mvvm.model.Song
 import com.example.music_player_mvvm.model.SongProvider.Companion.SONG_PROVIDER_URI
+import com.example.music_player_mvvm.model.SongRepository
 import com.example.music_player_mvvm.viewmodel.SharedViewModel
-import com.example.music_player_mvvm.views.adapter.SongListAdapter
 
 
 class SettingScreenFragment : Fragment() {
-    private val sharedViewModel: SharedViewModel by activityViewModels()
+    private var songsLoaded = false
+
+    private val sharedViewModel: SharedViewModel by activityViewModels {
+        CustomViewModelFactory(SongRepository)
+    }
     private var songsAdded = false
 
     private var _binding: FragmentSettingScreenBinding? = null
@@ -41,13 +44,12 @@ class SettingScreenFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initViews()
-        loadSongsFromProvider()
 
-        if (!songsAdded) {
-            addNewSongsToProvider()
-            songsAdded = true
-        }
+        initViews()
+
+        addNewSongsToProvider()
+
+        loadSongsFromProvider()
 
         binding.addButton.setOnClickListener {
             addSongs()
@@ -73,7 +75,6 @@ class SettingScreenFragment : Fragment() {
         recyclerView.addItemDecoration(dividerItemDecoration)
     }
 
-
     private fun onSongClick(position: Int) {
         // Toggle the selected state of the song
         songs[position].selected = !songs[position].selected
@@ -82,13 +83,22 @@ class SettingScreenFragment : Fragment() {
         recyclerView.adapter?.notifyDataSetChanged()
     }
 
-
-
     // Implement your logic for adding new songs
-     private fun addSongs() {
+    private fun addSongs() {
         // Add the selected songs to the shared ViewModel
         val selectedSongs = songs.filter { it.selected }
-        sharedViewModel.updateSelectedSongs(selectedSongs)
+        sharedViewModel.addNewSongs(selectedSongs)
+
+        // Insert the selected songs into the SongProvider
+        for (song in selectedSongs) {
+            val contentValues = ContentValues().apply {
+                put(SONG_NAME, song.title)
+                put(SONG_URI, song.songUri.toString())
+                put(ALBUM_ART_URI, song.albumArtUri.toString())
+            }
+
+            requireActivity().contentResolver.insert(SONG_PROVIDER_URI, contentValues)
+        }
 
         // Reset the selected state for all songs
         songs.forEach { it.selected = false }
@@ -99,43 +109,46 @@ class SettingScreenFragment : Fragment() {
 
 
     private fun addNewSongsToProvider() {
+        if (songsLoaded) {
+            return
+        }
         val newSongs = listOf(
             Song(
                 SONG_NAME_FOUR,
-                Uri.parse("android.resource://com.example.music_player_mvvm/${R.raw.song4}"),
-                Uri.parse("android.resource://com.example.music_player_mvvm/${R.drawable.album_art_4}")),
+                Uri.parse("${URI_PATH}${R.raw.song4}"),
+                Uri.parse("${URI_PATH}${R.drawable.album_art_4}")),
             Song(
                 SONG_NAME_FIVE,
-                Uri.parse("android.resource://com.example.music_player_mvvm/${R.raw.song5}"),
-                Uri.parse("android.resource://com.example.music_player_mvvm/${R.drawable.album_art_5}")),
+                Uri.parse("${URI_PATH}${R.raw.song5}"),
+                Uri.parse("${URI_PATH}${R.drawable.album_art_5}")),
             Song(
                 SONG_NAME_SIX,
-                Uri.parse("android.resource://com.example.music_player_mvvm/${R.raw.song6}"),
-                Uri.parse("android.resource://com.example.music_player_mvvm/${R.drawable.album_art_6}")),
+                Uri.parse("${URI_PATH}${R.raw.song6}"),
+                Uri.parse("${URI_PATH}${R.drawable.album_art_6}")),
             Song(
                 SONG_NAME_SEVEN,
-                Uri.parse("android.resource://com.example.music_player_mvvm/${R.raw.song7}"),
-                Uri.parse("android.resource://com.example.music_player_mvvm/${R.drawable.album_art_7}")),
+                Uri.parse("${URI_PATH}${R.raw.song7}"),
+                Uri.parse("${URI_PATH}${R.drawable.album_art_7}")),
             Song(
                 SONG_NAME_EIGHT,
-                Uri.parse("android.resource://com.example.music_player_mvvm/${R.raw.song8}"),
-                Uri.parse("android.resource://com.example.music_player_mvvm/${R.drawable.album_art_8}")),
+                Uri.parse("${URI_PATH}${R.raw.song8}"),
+                Uri.parse("${URI_PATH}${R.drawable.album_art_8}")),
             Song(
                 SONG_NAME_NINE,
-                Uri.parse("android.resource://com.example.music_player_mvvm/${R.raw.song9}"),
-                Uri.parse("android.resource://com.example.music_player_mvvm/${R.drawable.album_art_9}")),
+                Uri.parse("${URI_PATH}${R.raw.song9}"),
+                Uri.parse("${URI_PATH}${R.drawable.album_art_9}")),
             Song(
                 SONG_NAME_TEN,
-                Uri.parse("android.resource://com.example.music_player_mvvm/${R.raw.song10}"),
-                Uri.parse("android.resource://com.example.music_player_mvvm/${R.drawable.album_art_10}")),
+                Uri.parse("${URI_PATH}${R.raw.song10}"),
+                Uri.parse("${URI_PATH}${R.drawable.album_art_10}")),
             // Add the remaining three songs with their respective URIs
         )
 
         for (song in newSongs) {
             val contentValues = ContentValues().apply {
-                put("song_name", song.title)
-                put("song_uri", song.songUri.toString())
-                put("album_art_uri", song.albumArtUri.toString())
+                put(SONG_NAME, song.title)
+                put(SONG_URI, song.songUri.toString())
+                put(ALBUM_ART_URI, song.albumArtUri.toString())
             }
 
             requireActivity().contentResolver.insert(SONG_PROVIDER_URI, contentValues)
@@ -157,14 +170,19 @@ class SettingScreenFragment : Fragment() {
         cursor?.use {
             while (it.moveToNext()) {
                 try {
-                    val title = it.getString(it.getColumnIndexOrThrow("song_name"))
-                    val songUri = Uri.parse(it.getString(it.getColumnIndexOrThrow("song_uri")))
-                    val albumArtUri = Uri.parse(it.getString(it.getColumnIndexOrThrow("album_art_uri")))
+                    val title = it.getString(it.getColumnIndexOrThrow(SONG_NAME))
+                    val songUri = Uri.parse(it.getString(it.getColumnIndexOrThrow(SONG_URI)))
+                    val albumArtUri = Uri.parse(it.getString(it.getColumnIndexOrThrow(ALBUM_ART_URI)))
 
                     val song = Song(title, songUri, albumArtUri)
-                    songs.add(song)
+                    val isNew = songs.contains(song)
+                    if(!isNew){
+                        songs.add(song)
+                    }
+                   songs = songs.distinct().toMutableList()
                 } catch (e: IllegalArgumentException) {
-                    Log.e("SettingScreenFragment", "Error reading song data from provider: ${e.message}")
+                    Log.e(getString(R.string.settingscreenfragment),
+                        getString(R.string.error_reading_song_data_from_provider, e.message))
                 }
             }
         }
@@ -179,7 +197,12 @@ class SettingScreenFragment : Fragment() {
         const val SONG_NAME_SEVEN: String = "Alan Walker - Faded"
         const val SONG_NAME_EIGHT: String = "Adele - Someone Like You "
         const val SONG_NAME_NINE: String = "John Legend - All of Me "
-        const val SONG_NAME_TEN: String = "Avicii ft. Aloe Blacc - Wake Me Up "
+        const val SONG_NAME_TEN: String = "Avicii ft - Wake Me Up "
+        const val SONG_NAME = "song_name"
+        const val SONG_URI = "song_uri"
+        const val ALBUM_ART_URI = "album_art_uri"
+        const val URI_PATH = "android.resource://com.example.music_player_mvvm/"
+
 
     }
 }

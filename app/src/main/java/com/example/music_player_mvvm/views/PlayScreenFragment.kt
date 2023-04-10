@@ -16,6 +16,7 @@ import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.fragment.app.viewModels
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bumptech.glide.Glide
+import com.example.music_player_mvvm.R
 import com.example.music_player_mvvm.model.media.MediaPlayerHolder
 import com.example.music_player_mvvm.model.Song
 import com.example.music_player_mvvm.model.SongRepository
@@ -96,14 +97,15 @@ class PlayScreenFragment : Fragment() {
     private val songChangedReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent != null && intent.action == PlayScreenViewModel.ACTION_SONG_CHANGED) {
-                val songTitle = intent.getStringExtra("song_title") ?: ""
-                val songUri = Uri.parse(intent.getStringExtra("song_uri") ?: "")
-                val albumArtUri = Uri.parse(intent.getStringExtra("album_art_uri") ?: "")
+                val songTitle = intent.getStringExtra(SONG_TITLE) ?: ""
+                val songUri = Uri.parse(intent.getStringExtra(SONG_URI) ?: "")
+                val albumArtUri = Uri.parse(intent.getStringExtra(ALBUM_ART_URI) ?: "")
                 val song = Song(songTitle, songUri, albumArtUri)
                 updateSongInfo(song)
 
                 context?.let {
-                    Toast.makeText(it, "Song changed: $songTitle", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(it,
+                        getString(R.string.song_changed, songTitle), Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -225,5 +227,8 @@ class PlayScreenFragment : Fragment() {
 
     companion object {
         const val SONG_TITLE_KEY: String = "songTitle"
+        const val SONG_TITLE = "song_title"
+        const val SONG_URI = "song_uri"
+        const val ALBUM_ART_URI = "album_art_uri"
     }
 }

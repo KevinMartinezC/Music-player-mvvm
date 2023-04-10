@@ -13,27 +13,27 @@ class SongProvider : ContentProvider() {
 
         Song(
             SONG_NAME_ONE,
-            Uri.parse("android.resource://com.example.music_player_mvvm/${R.raw.song1}"),
-            Uri.parse("android.resource://com.example.music_player_mvvm/${R.drawable.album_art_1}")
+            Uri.parse("${URI_PATH}${R.raw.song1}"),
+            Uri.parse("${URI_PATH}${R.drawable.album_art_1}")
         ),
         Song(
             SONG_NAME_TWO,
-            Uri.parse("android.resource://com.example.music_player_mvvm/${R.raw.song2}"),
-            Uri.parse("android.resource://com.example.music_player_mvvm/${R.drawable.album_art_2}")
+            Uri.parse("${URI_PATH}${R.raw.song2}"),
+            Uri.parse("${URI_PATH}${R.drawable.album_art_2}")
         ),
         Song(
             SONG_NAME_THREE,
-            Uri.parse("android.resource://com.example.music_player_mvvm/${R.raw.song3}"),
-            Uri.parse("android.resource://com.example.music_player_mvvm/${R.drawable.album_art_3}")
+            Uri.parse("${URI_PATH}${R.raw.song3}"),
+            Uri.parse("${URI_PATH}${R.drawable.album_art_3}")
         )
     )
 
     val songs: List<Song>
         get() = _songs.toList()
+
     override fun onCreate(): Boolean {
         return true
     }
-
 
     override fun query(
         uri: Uri,
@@ -42,23 +42,29 @@ class SongProvider : ContentProvider() {
         selectionArgs: Array<String>?,
         sortOrder: String?
     ): Cursor {
-        val matrixCursor = MatrixCursor(arrayOf("_id", "song_name", "song_uri", "album_art_uri"))
-
+        val matrixCursor = MatrixCursor(arrayOf(ID, SONG_NAME, SONG_URI, ALBUM_ART_URI))
         songs.forEachIndexed { index, song ->
-            matrixCursor.addRow(arrayOf(index, song.title, song.songUri.toString(), song.albumArtUri.toString()))
+            matrixCursor.addRow(
+                arrayOf(
+                    index,
+                    song.title,
+                    song.songUri.toString(),
+                    song.albumArtUri.toString()
+                )
+            )
         }
 
         return matrixCursor
     }
 
-    override fun insert(uri: Uri, values: ContentValues?): Uri? {
+    override fun insert(uri: Uri, values: ContentValues?): Uri {
         if (values == null) {
             throw IllegalArgumentException("ContentValues cannot be null")
         }
 
-        val title = values.getAsString("song_name")
-        val songUri = Uri.parse(values.getAsString("song_uri"))
-        val albumArtUri = Uri.parse(values.getAsString("album_art_uri"))
+        val title = values.getAsString(SONG_NAME)
+        val songUri = Uri.parse(values.getAsString(SONG_URI))
+        val albumArtUri = Uri.parse(values.getAsString(ALBUM_ART_URI))
 
         val song = Song(title, songUri, albumArtUri)
         _songs.add(song)
@@ -83,17 +89,39 @@ class SongProvider : ContentProvider() {
         return null
     }
 
-   /* companion object {
-        // Add your constants here, e.g.:
-        // const val AUTHORITY = "com.example.music_player_mvvm.SongProvider"
-        // val SONG_PROVIDER_URI: Uri = Uri.parse("content://$AUTHORITY/songs")
-    }*/
-
     companion object {
         const val SONG_NAME_ONE: String = "Bar Liar"
         const val SONG_NAME_TWO: String = "Girls Like You"
         const val SONG_NAME_THREE: String = "See You Again"
-        const val AUTHORITY = "com.example.music_player_mvvm.provider"
-         val SONG_PROVIDER_URI: Uri = Uri.parse("content://$AUTHORITY/songs")
+        private const val AUTHORITY = "com.example.music_player_mvvm.provider"
+        const val URI_PATH = "android.resource://com.example.music_player_mvvm/"
+        const val ID = "_id"
+        const val SONG_NAME = "song_name"
+        const val SONG_URI = "song_uri"
+        const val ALBUM_ART_URI = "album_art_uri"
+        val SONG_PROVIDER_URI: Uri = Uri.parse("content://$AUTHORITY/songs")
+
+        fun getSongsFromCursor(cursor: Cursor): List<Song> {
+            val songs = mutableListOf<Song>()
+
+            val nameColumnIndex = cursor.getColumnIndex(SONG_NAME)
+            val songUriColumnIndex = cursor.getColumnIndex(SONG_URI)
+            val albumArtUriColumnIndex = cursor.getColumnIndex(ALBUM_ART_URI)
+
+            if (nameColumnIndex == -1 || songUriColumnIndex == -1 || albumArtUriColumnIndex == -1) {
+                return emptyList()
+            }
+
+            while (cursor.moveToNext()) {
+                val title = cursor.getString(nameColumnIndex)
+                val songUri = Uri.parse(cursor.getString(songUriColumnIndex))
+                val albumArtUri = Uri.parse(cursor.getString(albumArtUriColumnIndex))
+
+                val song = Song(title, songUri, albumArtUri)
+                songs.add(song)
+            }
+            return songs
+        }
+
     }
 }
