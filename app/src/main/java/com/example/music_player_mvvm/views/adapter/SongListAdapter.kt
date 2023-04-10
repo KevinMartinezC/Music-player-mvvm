@@ -3,8 +3,11 @@ package com.example.music_player_mvvm.views.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.example.music_player_mvvm.R
 import com.example.music_player_mvvm.model.Song
 
 
@@ -14,7 +17,8 @@ class SongListAdapter(
 ) : RecyclerView.Adapter<SongListAdapter.SongViewHolder>() {
 
     inner class SongViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val title: TextView = itemView.findViewById(android.R.id.text1)
+        val title: TextView = itemView.findViewById(R.id.songTitleTextView)
+        val image: ImageView = itemView.findViewById(R.id.albumArtImageView)
 
         init {
             itemView.setOnClickListener {
@@ -25,7 +29,7 @@ class SongListAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(
-            android.R.layout.simple_list_item_1, parent, false
+            R.layout.song_list_item, parent, false
         )
         return SongViewHolder(itemView)
     }
@@ -33,6 +37,7 @@ class SongListAdapter(
     override fun onBindViewHolder(holder: SongViewHolder, position: Int) {
         val song = songs[position]
         holder.title.text = song.title
+        Glide.with(holder.image.context).load(song.albumArtUri).into(holder.image)
     }
 
     override fun getItemCount(): Int {
