@@ -1,109 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
-    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".views.PlayScreenFragment">
+
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".views.PlayScreenFragment">
+        android:fillViewport="true">
 
-        <ScrollView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fillViewport="true">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-            <LinearLayout
+            <androidx.constraintlayout.motion.widget.MotionLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/motionLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                app:layoutDescription="@xml/activity_detail_scene">
 
-                <androidx.constraintlayout.motion.widget.MotionLayout
-                    xmlns:app="http://schemas.android.com/apk/res-auto"
-                    android:id="@+id/motionLayout"
+                <ImageView
+                    android:id="@+id/albumArtImageView"
+                    android:layout_width="@dimen/width"
+                    android:layout_height="@dimen/height"
+                    android:layout_marginTop="@dimen/margin_top_image_song"
+                    android:contentDescription="@string/music_image"
+                    android:src="@drawable/album_art_1"
+                    app:layout_constraintBottom_toTopOf="@+id/songTitleTextView"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/songTitleTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/marginTop_title"
+                    android:text="@string/song_title"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/text_title_size"
+                    app:layout_constraintBottom_toTopOf="@+id/seekBar"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/albumArtImageView" />
+
+                <SeekBar
+                    android:id="@+id/seekBar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:layoutDescription="@xml/activity_detail_scene">
+                    android:layout_marginStart="@dimen/margin_start_seekbar"
+                    android:layout_marginEnd="@dimen/margin_end_seekbar"
+                    android:max="100"
+                    android:value="@{viewmodel}"
+                    app:layout_constraintBottom_toTopOf="@+id/controlsLayout"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/songTitleTextView" />
 
-                    <ImageView
-                        android:id="@+id/albumArtImageView"
-                        android:layout_width="@dimen/width"
-                        android:layout_height="@dimen/height"
-                        android:layout_marginTop="@dimen/margin_top_image_song"
-                        android:contentDescription="@string/music_image"
-                        android:src="@drawable/album_art_1"
-                        app:layout_constraintBottom_toTopOf="@+id/songTitleTextView"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                <LinearLayout
+                    android:id="@+id/controlsLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/seekBar">
 
-                    <TextView
-                        android:id="@+id/songTitleTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/marginTop_title"
-                        android:text="@string/song_title"
-                        android:textColor="@color/black"
-                        android:textSize="@dimen/text_title_size"
-                        app:layout_constraintBottom_toTopOf="@+id/seekBar"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/albumArtImageView" />
+                    <com.google.android.material.floatingactionbutton.FloatingActionButton
+                        android:id="@+id/previousButton"
+                        android:layout_width="@dimen/width_button"
+                        android:layout_height="@dimen/height_button"
+                        android:contentDescription="@string/previous_song_button"
+                        app:srcCompat="@drawable/outline_skip_previous_24" />
 
-                    <SeekBar
-                        android:id="@+id/seekBar"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/margin_start_seekbar"
-                        android:layout_marginEnd="@dimen/margin_end_seekbar"
-                        android:max="100"
-                        android:value="@{viewmodel}"
-                        app:layout_constraintBottom_toTopOf="@+id/controlsLayout"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/songTitleTextView" />
+                    <com.google.android.material.floatingactionbutton.FloatingActionButton
+                        android:id="@+id/playPauseButton"
+                        android:layout_width="@dimen/width_button"
+                        android:layout_height="@dimen/height_button"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginRight="20dp"
+                        android:contentDescription="@string/play_or_pause_the_song_button"
+                        app:srcCompat="@drawable/outline_play_arrow_24" />
 
-                    <LinearLayout
-                        android:id="@+id/controlsLayout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="horizontal"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/seekBar">
+                    <com.google.android.material.floatingactionbutton.FloatingActionButton
+                        android:id="@+id/nextButton"
+                        android:layout_width="@dimen/width_button"
+                        android:layout_height="@dimen/height_button"
+                        android:contentDescription="@string/go_to_the_next_song_button"
+                        app:srcCompat="@drawable/outline_skip_next_24" />
 
-                        <ImageButton
-                            android:id="@+id/previousButton"
-                            android:layout_width="@dimen/width_button"
-                            android:layout_height="@dimen/height_button"
-                            android:layout_marginBottom="@dimen/margin_bottom_button"
-                            android:backgroundTint="?attr/colorOnSurface"
-                            android:contentDescription="@string/previous_song_button"
-                            android:padding="@dimen/padding_button"
-                            android:src="@android:drawable/ic_media_previous" />
-
-                        <ImageButton
-                            android:id="@+id/playPauseButton"
-                            android:layout_width="@dimen/width_button"
-                            android:layout_height="@dimen/height_button"
-                            android:layout_marginBottom="@dimen/margin_bottom_button"
-                            android:backgroundTint="?attr/colorOnSurface"
-                            android:contentDescription="@string/play_or_pause_the_song_button"
-                            android:padding="@dimen/padding_button"
-                            android:src="@android:drawable/ic_media_play" />
-
-                        <ImageButton
-                            android:id="@+id/nextButton"
-                            android:layout_width="@dimen/width_button"
-                            android:layout_height="@dimen/height_button"
-                            android:layout_marginBottom="@dimen/margin_bottom_button"
-                            android:backgroundTint="?attr/colorOnSurface"
-                            android:contentDescription="@string/go_to_the_next_song_button"
-                            android:padding="@dimen/padding_button"
-                            android:src="@android:drawable/ic_media_next" />
-
-                    </LinearLayout>
-                </androidx.constraintlayout.motion.widget.MotionLayout>
-            </LinearLayout>
-        </ScrollView>
-
-    </FrameLayout>
+                </LinearLayout>
+            </androidx.constraintlayout.motion.widget.MotionLayout>
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>
