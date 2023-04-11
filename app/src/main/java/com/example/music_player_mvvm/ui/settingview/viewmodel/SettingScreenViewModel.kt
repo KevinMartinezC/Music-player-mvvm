@@ -42,8 +42,11 @@ class SettingScreenViewModel(songRepository: SongRepository) : ViewModel() {
     }
 
     fun addNewSongs(newSongs: List<Song>) {
-        _songs.value = _songs.value.orEmpty() + newSongs
+        val nonDuplicateSongs =
+            newSongs.filter { newSong -> !_songs.value.orEmpty().contains(newSong) }
+        _songs.value = _songs.value.orEmpty() + nonDuplicateSongs
     }
+
 
     fun fetchSongsFromProvider(activity: Activity): MutableList<Song> {
         val cursor = activity.contentResolver.query(

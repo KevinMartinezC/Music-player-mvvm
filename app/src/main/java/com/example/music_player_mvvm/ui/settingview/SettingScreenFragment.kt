@@ -97,10 +97,18 @@ class SettingScreenFragment : Fragment() {
     private fun addSongs() {
         // Add the selected songs to the shared ViewModel
         val selectedSongs = songs.filter { it.selected }
-        viewModel.addNewSongs(selectedSongs)
 
-        // Insert the selected songs into the SongProvider
-        for (song in selectedSongs) {
+        // Check if the song is already in the viewModel.songs list
+        val nonDuplicateSongs = selectedSongs.filter { newSong ->
+            !viewModel.songs.value.orEmpty()
+                .any { existingSong -> existingSong.title == newSong.title }
+        }
+
+        // Update the ViewModel
+        viewModel.addNewSongs(nonDuplicateSongs)
+
+        // Insert the non-duplicate songs into the SongProvider
+        for (song in nonDuplicateSongs) {
             val contentValues = ContentValues().apply {
                 put(SONG_NAME, song.title)
                 put(SONG_URI, song.songUri.toString())
