@@ -1,4 +1,4 @@
-package com.example.music_player_mvvm.views
+package com.example.music_player_mvvm.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle

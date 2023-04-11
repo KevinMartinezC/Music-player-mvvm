@@ -1,4 +1,4 @@
-package com.example.music_player_mvvm.views
+package com.example.music_player_mvvm.ui.settingview.adapter
 
 import android.graphics.Color
 import android.view.LayoutInflater

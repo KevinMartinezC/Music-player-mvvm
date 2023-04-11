@@ -1,4 +1,4 @@
-package com.example.music_player_mvvm.viewmodel
+package com.example.music_player_mvvm.ui.playerview.viewmodel
 
 
 import android.app.Application

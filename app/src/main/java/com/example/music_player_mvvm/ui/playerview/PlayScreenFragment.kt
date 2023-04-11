@@ -1,4 +1,4 @@
-package com.example.music_player_mvvm.views
+package com.example.music_player_mvvm.ui.playerview
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -20,8 +20,9 @@ import com.example.music_player_mvvm.R
 import com.example.music_player_mvvm.model.media.MediaPlayerHolder
 import com.example.music_player_mvvm.model.Song
 import com.example.music_player_mvvm.model.SongRepository
-import com.example.music_player_mvvm.viewmodel.PlayScreenViewModel
+import com.example.music_player_mvvm.ui.playerview.viewmodel.PlayScreenViewModel
 import com.example.music_player_mvvm.databinding.FragmentPlayScreenBinding
+import com.example.music_player_mvvm.ui.playerview.viewmodel.PlayScreenViewModelFactory
 
 
 class PlayScreenFragment : Fragment() {

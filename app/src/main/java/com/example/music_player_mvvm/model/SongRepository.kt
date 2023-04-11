@@ -1,7 +1,9 @@
 package com.example.music_player_mvvm.model
 
+import android.annotation.SuppressLint
 import android.content.Context
 
+@SuppressLint("StaticFieldLeak")
 object SongRepository {
     private lateinit var context: Context
     var songs: List<Song> = listOf()
@@ -15,6 +17,7 @@ object SongRepository {
             cursor.close()
         }
     }
+
     fun getDefaultSongs(): List<Song> {
         return songs.take(3)
     }

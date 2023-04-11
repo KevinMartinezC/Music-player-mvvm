@@ -1,4 +1,4 @@
-package com.example.music_player_mvvm.views.adapter
+package com.example.music_player_mvvm.ui.homeview.adapter
 
 import android.view.LayoutInflater
 import android.view.View

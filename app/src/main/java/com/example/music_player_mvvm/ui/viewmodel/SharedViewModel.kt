@@ -1,4 +1,4 @@
-package com.example.music_player_mvvm.viewmodel
+package com.example.music_player_mvvm.ui.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.LiveData

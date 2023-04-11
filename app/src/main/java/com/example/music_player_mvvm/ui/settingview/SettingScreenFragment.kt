@@ -1,4 +1,4 @@
-package com.example.music_player_mvvm.views
+package com.example.music_player_mvvm.ui.settingview
 
 import android.content.ContentUris
 import android.content.ContentValues
@@ -18,7 +18,9 @@ import com.example.music_player_mvvm.databinding.FragmentSettingScreenBinding
 import com.example.music_player_mvvm.model.Song
 import com.example.music_player_mvvm.model.SongProvider.Companion.SONG_PROVIDER_URI
 import com.example.music_player_mvvm.model.SongRepository
-import com.example.music_player_mvvm.viewmodel.SharedViewModel
+import com.example.music_player_mvvm.ui.viewmodel.SharedViewModel
+import com.example.music_player_mvvm.ui.viewmodel.CustomViewModelFactory
+import com.example.music_player_mvvm.ui.settingview.adapter.SettingSongListAdapter
 
 
 class SettingScreenFragment : Fragment() {
@@ -133,32 +135,39 @@ class SettingScreenFragment : Fragment() {
         val newSongs = listOf(
             Song(
                 SONG_NAME_FOUR,
-                Uri.parse("${URI_PATH}${R.raw.song4}"),
-                Uri.parse("${URI_PATH}${R.drawable.album_art_4}")),
+                Uri.parse("$URI_PATH${R.raw.song4}"),
+                Uri.parse("$URI_PATH${R.drawable.album_art_4}")
+            ),
             Song(
                 SONG_NAME_FIVE,
-                Uri.parse("${URI_PATH}${R.raw.song5}"),
-                Uri.parse("${URI_PATH}${R.drawable.album_art_5}")),
+                Uri.parse("$URI_PATH${R.raw.song5}"),
+                Uri.parse("$URI_PATH${R.drawable.album_art_5}")
+            ),
             Song(
                 SONG_NAME_SIX,
-                Uri.parse("${URI_PATH}${R.raw.song6}"),
-                Uri.parse("${URI_PATH}${R.drawable.album_art_6}")),
+                Uri.parse("$URI_PATH${R.raw.song6}"),
+                Uri.parse("$URI_PATH${R.drawable.album_art_6}")
+            ),
             Song(
                 SONG_NAME_SEVEN,
-                Uri.parse("${URI_PATH}${R.raw.song7}"),
-                Uri.parse("${URI_PATH}${R.drawable.album_art_7}")),
+                Uri.parse("$URI_PATH${R.raw.song7}"),
+                Uri.parse("$URI_PATH${R.drawable.album_art_7}")
+            ),
             Song(
                 SONG_NAME_EIGHT,
-                Uri.parse("${URI_PATH}${R.raw.song8}"),
-                Uri.parse("${URI_PATH}${R.drawable.album_art_8}")),
+                Uri.parse("$URI_PATH${R.raw.song8}"),
+                Uri.parse("$URI_PATH${R.drawable.album_art_8}")
+            ),
             Song(
                 SONG_NAME_NINE,
-                Uri.parse("${URI_PATH}${R.raw.song9}"),
-                Uri.parse("${URI_PATH}${R.drawable.album_art_9}")),
+                Uri.parse("$URI_PATH${R.raw.song9}"),
+                Uri.parse("$URI_PATH${R.drawable.album_art_9}")
+            ),
             Song(
                 SONG_NAME_TEN,
-                Uri.parse("${URI_PATH}${R.raw.song10}"),
-                Uri.parse("${URI_PATH}${R.drawable.album_art_10}")),
+                Uri.parse("$URI_PATH${R.raw.song10}"),
+                Uri.parse("$URI_PATH${R.drawable.album_art_10}")
+            ),
             // Add the remaining three songs with their respective URIs
         )
 

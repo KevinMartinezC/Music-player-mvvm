@@ -1,9 +1,8 @@
-package com.example.music_player_mvvm.views
+package com.example.music_player_mvvm.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.music_player_mvvm.model.SongRepository
-import com.example.music_player_mvvm.viewmodel.SharedViewModel
 
 class CustomViewModelFactory(private val songRepository: SongRepository) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

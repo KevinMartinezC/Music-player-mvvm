@@ -1,4 +1,4 @@
-package com.example.music_player_mvvm.viewmodel
+package com.example.music_player_mvvm.ui.homeview.viewmodel
 
 import android.content.ContentResolver
 import android.net.Uri

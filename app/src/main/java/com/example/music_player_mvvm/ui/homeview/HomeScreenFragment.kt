@@ -1,9 +1,7 @@
-package com.example.music_player_mvvm.views
+package com.example.music_player_mvvm.ui.homeview
 
 import android.media.MediaPlayer
-import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +9,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,12 +16,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.music_player_mvvm.model.media.MediaPlayerHolder
 import com.example.music_player_mvvm.R
 import com.example.music_player_mvvm.model.Song
-import com.example.music_player_mvvm.model.SongContract
-import com.example.music_player_mvvm.views.adapter.SongListAdapter
+import com.example.music_player_mvvm.ui.homeview.adapter.SongListAdapter
 import com.example.music_player_mvvm.model.SongRepository
 import com.example.music_player_mvvm.databinding.FragmentHomeScreenBinding
-import com.example.music_player_mvvm.viewmodel.HomeScreenViewModel
-import com.example.music_player_mvvm.viewmodel.SharedViewModel
+import com.example.music_player_mvvm.ui.homeview.viewmodel.HomeScreenViewModel
+import com.example.music_player_mvvm.ui.viewmodel.SharedViewModel
+import com.example.music_player_mvvm.ui.viewmodel.CustomViewModelFactory
+import com.example.music_player_mvvm.ui.playerview.PlayScreenFragment
 
 
 class HomeScreenFragment : Fragment() {
