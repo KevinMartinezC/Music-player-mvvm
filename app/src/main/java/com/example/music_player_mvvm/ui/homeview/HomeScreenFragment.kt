@@ -61,7 +61,16 @@ class HomeScreenFragment : Fragment() {
             setupRecyclerView()
         }
 
+        // Observe the deleted song position
+        sharedViewModel.deletedSongPosition.observe(viewLifecycleOwner) { position ->
+            position?.let {
+                // Remove the song from the local list
+                songs.removeAt(it)
+                recyclerView.adapter?.notifyItemRemoved(it)
+            }
+        }
     }
+
 
     private fun initViews() {
         recyclerView = binding.recyclerView

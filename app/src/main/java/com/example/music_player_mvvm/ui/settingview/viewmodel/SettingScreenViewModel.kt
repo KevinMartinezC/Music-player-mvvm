@@ -22,6 +22,10 @@ class SettingScreenViewModel(songRepository: SongRepository) : ViewModel() {
     private val _deletedSongPosition = MutableLiveData<Int?>()
     val deletedSongPosition: LiveData<Int?> get() = _deletedSongPosition
 
+    fun removeSongFromHomeScreen(position: Int) {
+        _songs.value = _songs.value?.filterIndexed { index, _ -> index != position }
+    }
+
     fun deleteSong(position: Int, activity: Activity) {
         val deleteUri =
             ContentUris.withAppendedId(SONG_PROVIDER_URI, position.toLong())
@@ -29,7 +33,9 @@ class SettingScreenViewModel(songRepository: SongRepository) : ViewModel() {
 
         // Notify observers of the deleted position
         _deletedSongPosition.value = position
+        removeSongFromHomeScreen(position)
     }
+
 
     fun resetDeletedSongPosition() {
         _deletedSongPosition.postValue(null)

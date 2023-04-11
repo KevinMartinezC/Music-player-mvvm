@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <androidx.constraintlayout.motion.widget.MotionLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+            <androidx.constraintlayout.motion.widget.MotionLayout
                 android:id="@+id/motionLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -104,7 +104,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|end"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginTop="@dimen/_16dp"
+        android:layout_marginEnd="@dimen/_16dp"
+        android:contentDescription="@string/settings_button_description"
         app:srcCompat="@drawable/outline_settings_24" />
 </FrameLayout>
