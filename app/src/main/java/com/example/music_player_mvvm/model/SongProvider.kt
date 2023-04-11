@@ -9,6 +9,8 @@ import android.net.Uri
 import com.example.music_player_mvvm.R
 
 class SongProvider : ContentProvider() {
+    private val _deletedSongs = mutableSetOf<String>()
+
     private val _songs = mutableListOf(
 
         Song(
@@ -44,14 +46,16 @@ class SongProvider : ContentProvider() {
     ): Cursor {
         val matrixCursor = MatrixCursor(arrayOf(ID, SONG_NAME, SONG_URI, ALBUM_ART_URI))
         songs.forEachIndexed { index, song ->
-            matrixCursor.addRow(
-                arrayOf(
-                    index,
-                    song.title,
-                    song.songUri.toString(),
-                    song.albumArtUri.toString()
+            if (!_deletedSongs.contains(song.title)) {
+                matrixCursor.addRow(
+                    arrayOf(
+                        index,
+                        song.title,
+                        song.songUri.toString(),
+                        song.albumArtUri.toString()
+                    )
                 )
-            )
+            }
         }
 
         return matrixCursor
@@ -84,6 +88,7 @@ class SongProvider : ContentProvider() {
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
         val id = ContentUris.parseId(uri).toInt()
         return if (id in _songs.indices) {
+            _deletedSongs.add(_songs[id].title)
             _songs.removeAt(id)
             1
         } else {
