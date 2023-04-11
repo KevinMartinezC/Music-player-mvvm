@@ -23,19 +23,8 @@
         android:maxLines="1"
         android:textAppearance="?attr/textAppearanceListItem"
         app:layout_constraintBottom_toBottomOf="@id/albumArtImageView"
-        app:layout_constraintEnd_toStartOf="@+id/delete_button"
-        app:layout_constraintStart_toEndOf="@id/albumArtImageView"
-        app:layout_constraintTop_toTopOf="@id/albumArtImageView" />
-
-    <ImageButton
-        android:id="@+id/delete_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/delete_song_button_description"
-        android:src="@drawable/ic_delete"
-        app:layout_constraintBottom_toBottomOf="@id/albumArtImageView"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/albumArtImageView"
         app:layout_constraintTop_toTopOf="@id/albumArtImageView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

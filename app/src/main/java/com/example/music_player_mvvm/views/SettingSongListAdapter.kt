@@ -9,8 +9,9 @@ import com.example.music_player_mvvm.databinding.SongListItemBinding
 import com.example.music_player_mvvm.model.Song
 
 class SettingSongListAdapter(
-    private val songs: List<Song>,
-    private val onSongClickListener: (Int) -> Unit
+    private val songs: MutableList<Song>,
+    private val onSongClickListener: (Int) -> Unit,
+    private val onDeleteClickListener: (Int) -> Unit
 ) : RecyclerView.Adapter<SettingSongListAdapter.SettingSongViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SettingSongViewHolder {
@@ -20,15 +21,22 @@ class SettingSongListAdapter(
     }
 
     override fun onBindViewHolder(holder: SettingSongViewHolder, position: Int) {
-        holder.bind(songs[position], position, onSongClickListener)
+        holder.bind(songs[position], position, onSongClickListener, onDeleteClickListener)
     }
 
     override fun getItemCount(): Int {
         return songs.size
     }
 
-    class SettingSongViewHolder(private val binding: SongListItemBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(song: Song, position: Int, onSongClickListener: (Int) -> Unit) {
+    inner class SettingSongViewHolder(private val binding: SongListItemBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+
+        fun bind(
+            song: Song,
+            position: Int,
+            onSongClickListener: (Int) -> Unit,
+            onDeleteClickListener: (Int) -> Unit
+        ) {
             binding.songTitleTextView.text = song.title
 
             // Update the item UI based on the song's selected state
@@ -47,6 +55,10 @@ class SettingSongListAdapter(
                 onSongClickListener(adapterPosition)
             }
 
+            // Set click listener for the delete button
+            binding.deleteButton.setOnClickListener {
+                onDeleteClickListener(adapterPosition)
+            }
         }
     }
 }

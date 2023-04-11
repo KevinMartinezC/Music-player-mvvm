@@ -82,8 +82,15 @@ class SongProvider : ContentProvider() {
     }
 
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
-        throw UnsupportedOperationException("Not supported. Read-only provider.")
+        val id = ContentUris.parseId(uri).toInt()
+        return if (id in _songs.indices) {
+            _songs.removeAt(id)
+            1
+        } else {
+            0
+        }
     }
+
 
     override fun getType(uri: Uri): String? {
         return null

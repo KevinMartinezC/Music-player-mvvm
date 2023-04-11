@@ -1,5 +1,6 @@
 package com.example.music_player_mvvm.views
 
+import android.content.ContentUris
 import android.content.ContentValues
 import android.net.Uri
 import android.os.Bundle
@@ -65,7 +66,11 @@ class SettingScreenFragment : Fragment() {
         val layoutManager = LinearLayoutManager(context)
         recyclerView.layoutManager = layoutManager
 
-        val adapter = SettingSongListAdapter(songs, this::onSongClick)
+        val adapter = SettingSongListAdapter(
+            songs,
+            this::onSongClick,
+            this::onDeleteButtonClick
+        )
         recyclerView.adapter = adapter
 
         val dividerItemDecoration = DividerItemDecoration(
@@ -74,6 +79,19 @@ class SettingScreenFragment : Fragment() {
         )
         recyclerView.addItemDecoration(dividerItemDecoration)
     }
+
+    private fun onDeleteButtonClick(position: Int) {
+        val songToDelete = songs[position]
+
+        // Delete the song from the SongProvider
+        val deleteUri = ContentUris.withAppendedId(SONG_PROVIDER_URI, position.toLong())
+        requireActivity().contentResolver.delete(deleteUri, null, null)
+
+        // Remove the song from the local list and update the RecyclerView
+        songs.removeAt(position)
+        recyclerView.adapter?.notifyDataSetChanged()
+    }
+
 
     private fun onSongClick(position: Int) {
         // Toggle the selected state of the song
