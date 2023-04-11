@@ -11,6 +11,7 @@ import com.example.music_player_mvvm.R
 import com.example.music_player_mvvm.model.Song
 
 
+@Suppress("DEPRECATION")
 class SongListAdapter(
     private val songs: List<Song>,
     private val onSongClickListener: (Int) -> Unit

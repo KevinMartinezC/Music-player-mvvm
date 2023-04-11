@@ -8,6 +8,7 @@ import com.bumptech.glide.Glide
 import com.example.music_player_mvvm.databinding.SongListItemBinding
 import com.example.music_player_mvvm.model.Song
 
+@Suppress("DEPRECATION")
 class SettingSongListAdapter(
     private val songs: MutableList<Song>,
     private val onSongClickListener: (Int) -> Unit,
@@ -21,7 +22,7 @@ class SettingSongListAdapter(
     }
 
     override fun onBindViewHolder(holder: SettingSongViewHolder, position: Int) {
-        holder.bind(songs[position], position, onSongClickListener, onDeleteClickListener)
+        holder.bind(songs[position], onSongClickListener, onDeleteClickListener)
     }
 
     override fun getItemCount(): Int {
@@ -33,7 +34,6 @@ class SettingSongListAdapter(
 
         fun bind(
             song: Song,
-            position: Int,
             onSongClickListener: (Int) -> Unit,
             onDeleteClickListener: (Int) -> Unit
         ) {

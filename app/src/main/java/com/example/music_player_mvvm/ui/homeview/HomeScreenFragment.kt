@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,8 +19,8 @@ import com.example.music_player_mvvm.ui.homeview.adapter.SongListAdapter
 import com.example.music_player_mvvm.model.SongRepository
 import com.example.music_player_mvvm.databinding.FragmentHomeScreenBinding
 import com.example.music_player_mvvm.ui.homeview.viewmodel.HomeScreenViewModel
-import com.example.music_player_mvvm.ui.viewmodel.SharedViewModel
-import com.example.music_player_mvvm.ui.viewmodel.CustomViewModelFactory
+import com.example.music_player_mvvm.ui.settingview.viewmodel.SettingScreenViewModel
+import com.example.music_player_mvvm.ui.settingview.viewmodel.CustomViewModelFactory
 import com.example.music_player_mvvm.ui.playerview.PlayScreenFragment
 
 
@@ -29,7 +28,7 @@ class HomeScreenFragment : Fragment() {
     private var defaultSongs: List<Song> = listOf()
 
     private val viewmodel: HomeScreenViewModel by viewModels()
-    private val sharedViewModel: SharedViewModel by activityViewModels {
+    private val sharedViewModel: SettingScreenViewModel by activityViewModels {
         CustomViewModelFactory(SongRepository)
     }
 
@@ -56,10 +55,10 @@ class HomeScreenFragment : Fragment() {
         viewmodel.loadSongsFromProvider(requireActivity().contentResolver)
         defaultSongs = SongRepository.getDefaultSongs()
 
-        sharedViewModel.songs.observe(viewLifecycleOwner, Observer { newSongs ->
+        sharedViewModel.songs.observe(viewLifecycleOwner) { newSongs ->
             songs = newSongs.toMutableList()
             setupRecyclerView()
-        })
+        }
 
     }
 

@@ -1,10 +1,8 @@
 package com.example.music_player_mvvm.ui.settingview
 
-import android.content.ContentUris
 import android.content.ContentValues
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,19 +16,16 @@ import com.example.music_player_mvvm.databinding.FragmentSettingScreenBinding
 import com.example.music_player_mvvm.model.Song
 import com.example.music_player_mvvm.model.SongProvider.Companion.SONG_PROVIDER_URI
 import com.example.music_player_mvvm.model.SongRepository
-import com.example.music_player_mvvm.ui.viewmodel.SharedViewModel
-import com.example.music_player_mvvm.ui.viewmodel.CustomViewModelFactory
+import com.example.music_player_mvvm.ui.settingview.viewmodel.SettingScreenViewModel
+import com.example.music_player_mvvm.ui.settingview.viewmodel.CustomViewModelFactory
 import com.example.music_player_mvvm.ui.settingview.adapter.SettingSongListAdapter
 
 
 class SettingScreenFragment : Fragment() {
-    private var songsLoaded = false
 
-    private val sharedViewModel: SharedViewModel by activityViewModels {
+    private val viewModel: SettingScreenViewModel by activityViewModels {
         CustomViewModelFactory(SongRepository)
     }
-    private var songsAdded = false
-
     private var _binding: FragmentSettingScreenBinding? = null
     private val binding get() = _binding!!
     private lateinit var recyclerView: RecyclerView
@@ -47,21 +42,27 @@ class SettingScreenFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
         initViews()
-
         addNewSongsToProvider()
-
         loadSongsFromProvider()
 
-        binding.addButton.setOnClickListener {
-            addSongs()
+        viewModel.deletedSongPosition.observe(viewLifecycleOwner) { position ->
+            position?.let {
+                // Remove the song from the local list
+                songs.removeAt(it)
+                recyclerView.adapter?.notifyItemRemoved(it)
+                viewModel.resetDeletedSongPosition()
+            }
         }
+
+
     }
 
     private fun initViews() {
         recyclerView = binding.recyclerView
-
+        binding.addButton.setOnClickListener {
+            addSongs()
+        }
     }
 
     private fun setupRecyclerView() {
@@ -83,31 +84,20 @@ class SettingScreenFragment : Fragment() {
     }
 
     private fun onDeleteButtonClick(position: Int) {
-        val songToDelete = songs[position]
-
-        // Delete the song from the SongProvider
-        val deleteUri = ContentUris.withAppendedId(SONG_PROVIDER_URI, position.toLong())
-        requireActivity().contentResolver.delete(deleteUri, null, null)
-
-        // Remove the song from the local list and update the RecyclerView
-        songs.removeAt(position)
-        recyclerView.adapter?.notifyDataSetChanged()
+        viewModel.deleteSong(position, requireActivity())
     }
-
 
     private fun onSongClick(position: Int) {
         // Toggle the selected state of the song
         songs[position].selected = !songs[position].selected
 
-        // Update the RecyclerView to reflect the changes
-        recyclerView.adapter?.notifyDataSetChanged()
+        recyclerView.adapter?.notifyItemChanged(position)
     }
 
-    // Implement your logic for adding new songs
     private fun addSongs() {
         // Add the selected songs to the shared ViewModel
         val selectedSongs = songs.filter { it.selected }
-        sharedViewModel.addNewSongs(selectedSongs)
+        viewModel.addNewSongs(selectedSongs)
 
         // Insert the selected songs into the SongProvider
         for (song in selectedSongs) {
@@ -120,18 +110,17 @@ class SettingScreenFragment : Fragment() {
             requireActivity().contentResolver.insert(SONG_PROVIDER_URI, contentValues)
         }
 
-        // Reset the selected state for all songs
-        songs.forEach { it.selected = false }
-
-        // Update the RecyclerView to reflect the changes
-        recyclerView.adapter?.notifyDataSetChanged()
+        // Reset the selected state for all songs and notify the adapter of the change
+        songs.forEachIndexed { index, song ->
+            if (song.selected) {
+                song.selected = false
+                recyclerView.adapter?.notifyItemChanged(index)
+            }
+        }
     }
 
-
     private fun addNewSongsToProvider() {
-        if (songsLoaded) {
-            return
-        }
+
         val newSongs = listOf(
             Song(
                 SONG_NAME_FOUR,
@@ -184,40 +173,11 @@ class SettingScreenFragment : Fragment() {
     }
 
     private fun loadSongsFromProvider() {
-        val cursor = requireActivity().contentResolver.query(
-            SONG_PROVIDER_URI,
-            null,
-            null,
-            null,
-            null
-        )
-
-        songs = mutableListOf()
-
-        cursor?.use {
-            while (it.moveToNext()) {
-                try {
-                    val title = it.getString(it.getColumnIndexOrThrow(SONG_NAME))
-                    val songUri = Uri.parse(it.getString(it.getColumnIndexOrThrow(SONG_URI)))
-                    val albumArtUri = Uri.parse(it.getString(it.getColumnIndexOrThrow(ALBUM_ART_URI)))
-
-                    val song = Song(title, songUri, albumArtUri)
-                    val isNew = songs.contains(song)
-                    if(!isNew){
-                        songs.add(song)
-                    }
-                   songs = songs.distinct().toMutableList()
-                } catch (e: IllegalArgumentException) {
-                    Log.e(getString(R.string.settingscreenfragment),
-                        getString(R.string.error_reading_song_data_from_provider, e.message))
-                }
-            }
-        }
-
+        songs = viewModel.fetchSongsFromProvider(requireActivity())
         setupRecyclerView()
     }
 
-    companion object{
+    companion object {
         const val SONG_NAME_FOUR: String = "Sia - Chandelier "
         const val SONG_NAME_FIVE: String = "Camila Cabello - Havana"
         const val SONG_NAME_SIX: String = "MAGIC! - Rude "
@@ -229,7 +189,5 @@ class SettingScreenFragment : Fragment() {
         const val SONG_URI = "song_uri"
         const val ALBUM_ART_URI = "album_art_uri"
         const val URI_PATH = "android.resource://com.example.music_player_mvvm/"
-
-
     }
 }
