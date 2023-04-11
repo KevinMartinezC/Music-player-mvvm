@@ -15,6 +15,7 @@ import android.widget.Toast
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.fragment.app.viewModels
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.example.music_player_mvvm.R
 import com.example.music_player_mvvm.model.media.MediaPlayerHolder
@@ -128,6 +129,9 @@ class PlayScreenFragment : Fragment() {
         binding.playPauseButton.setOnClickListener { viewmodel.onPlayPauseButtonClick() }
         binding.previousButton.setOnClickListener { viewmodel.onPreviousButtonClick(songs) }
         binding.nextButton.setOnClickListener { viewmodel.onNextButtonClick(songs) }
+        binding.settingsButton.setOnClickListener {
+            findNavController().navigate(R.id.action_playScreenFragment_to_settingScreenFragment)
+        }
     }
 
     private fun initSongInfo() {
