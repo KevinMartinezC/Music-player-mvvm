@@ -28,11 +28,13 @@ import com.example.music_player_mvvm.ui.playerview.PlayScreenFragment
 class HomeScreenFragment : Fragment() {
     private var defaultSongs: List<Song> = listOf()
 
-    private val viewmodel: HomeScreenViewModel by viewModels()
+    // TODO: Update to viewModel!
+    private val viewModel: HomeScreenViewModel by viewModels()
     private val sharedViewModel: SettingScreenViewModel by activityViewModels {
         CustomViewModelFactory(SongRepository)
     }
 
+    // TODO: Move to constant
     private var currentSongIndex: Int = 0
     private lateinit var recyclerView: RecyclerView
     private var songs: MutableList<Song> = mutableListOf()
@@ -53,21 +55,27 @@ class HomeScreenFragment : Fragment() {
 
         initViews()
 
-        viewmodel.loadSongsFromProvider(requireActivity().contentResolver)
+        viewModel.loadSongsFromProvider(requireActivity().contentResolver)
         defaultSongs = SongRepository.getDefaultSongs()
 
-        sharedViewModel.songs.observe(viewLifecycleOwner) { newSongs ->
-            songs = newSongs.toMutableList()
-            setupRecyclerView()
-        }
+        addSongs()
+        observeDeletedSongs()
+    }
 
-        // Observe the deleted song position
+    private fun observeDeletedSongs() {
         sharedViewModel.deletedSongPosition.observe(viewLifecycleOwner) { position ->
             position?.let {
                 // Remove the song from the local list
                 songs.removeAt(it)
                 recyclerView.adapter?.notifyItemRemoved(it)
             }
+        }
+    }
+
+    private fun addSongs() {
+        sharedViewModel.songs.observe(viewLifecycleOwner) { newSongs ->
+            songs = newSongs.toMutableList()
+            setupRecyclerView()
         }
     }
 
@@ -108,6 +116,7 @@ class HomeScreenFragment : Fragment() {
             playSelectedSong(currentSongIndex)
             navigateToDetailActivity(currentSongIndex)
         } else {
+            // TODO: Move to function to follow SOLID
             Toast.makeText(
                 context,
                 getString(R.string.no_songs_in_the_playlist),

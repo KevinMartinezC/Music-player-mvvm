@@ -18,6 +18,7 @@ class SongListAdapter(
 ) : RecyclerView.Adapter<SongListAdapter.SongViewHolder>() {
 
     inner class SongViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        // TODO: Why not databinding?
         val title: TextView = itemView.findViewById(R.id.songTitleTextView)
         val image: ImageView = itemView.findViewById(R.id.albumArtImageView)
 
@@ -41,8 +42,5 @@ class SongListAdapter(
         Glide.with(holder.image.context).load(song.albumArtUri).into(holder.image)
     }
 
-    override fun getItemCount(): Int {
-        return songs.size
-
-    }
+    override fun getItemCount(): Int = songs.size
 }

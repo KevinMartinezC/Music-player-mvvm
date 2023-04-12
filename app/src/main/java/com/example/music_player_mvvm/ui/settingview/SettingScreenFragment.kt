@@ -54,8 +54,6 @@ class SettingScreenFragment : Fragment() {
                 viewModel.resetDeletedSongPosition()
             }
         }
-
-
     }
 
     private fun initViews() {
@@ -100,8 +98,9 @@ class SettingScreenFragment : Fragment() {
 
         // Check if the song is already in the viewModel.songs list
         val nonDuplicateSongs = selectedSongs.filter { newSong ->
-            !viewModel.songs.value.orEmpty()
-                .any { existingSong -> existingSong.title == newSong.title }
+            !viewModel.songs.value.orEmpty().any { existingSong ->
+                existingSong.title == newSong.title
+            }
         }
 
         // Update the ViewModel
@@ -168,7 +167,7 @@ class SettingScreenFragment : Fragment() {
             // Add the remaining three songs with their respective URIs
         )
 
-        for (song in newSongs) {
+        newSongs.forEach { song ->
             val contentValues = ContentValues().apply {
                 put(SONG_NAME, song.title)
                 put(SONG_URI, song.songUri.toString())
@@ -177,6 +176,7 @@ class SettingScreenFragment : Fragment() {
 
             requireActivity().contentResolver.insert(SONG_PROVIDER_URI, contentValues)
         }
+
         loadSongsFromProvider()
     }
 

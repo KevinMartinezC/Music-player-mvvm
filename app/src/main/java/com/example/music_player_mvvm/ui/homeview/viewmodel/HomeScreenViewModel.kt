@@ -7,10 +7,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.music_player_mvvm.model.Song
 import com.example.music_player_mvvm.model.SongContract
+import java.lang.Exception
 
 class HomeScreenViewModel : ViewModel() {
     private val songsMutableLiveData = MutableLiveData<List<Song>>()
-    fun songs(): LiveData<List<Song>> = songsMutableLiveData
+    val songs: LiveData<List<Song>>
+        get() = songsMutableLiveData
+
+    // TODO: Why function instead of val?
 
     fun loadSongsFromProvider(contentResolver: ContentResolver) {
         val songs = mutableListOf<Song>()
@@ -27,8 +31,7 @@ class HomeScreenViewModel : ViewModel() {
             null,
             null,
             null
-        )
-            ?.use { cursor ->
+        )?.use { cursor ->
                 if (cursor.moveToFirst()) {
                     do {
                         val titleIndex = cursor.getColumnIndex(SongContract.Columns.SONG_NAME)
@@ -46,10 +49,7 @@ class HomeScreenViewModel : ViewModel() {
                         }
                     } while (cursor.moveToNext())
                 }
-            }
-
-        // Set the value of the LiveData object
+        }
         songsMutableLiveData.postValue(songs)
     }
-
 }

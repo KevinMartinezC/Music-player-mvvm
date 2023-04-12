@@ -19,7 +19,15 @@ class PlayScreenViewModel(application: Application) : AndroidViewModel(applicati
     private val handler = Handler(Looper.getMainLooper())
 
     private val progressMutableLiveData = MutableLiveData<Int>()
-    fun progress(): LiveData<Int> = progressMutableLiveData
+
+    private val progress2: LiveData<Int>
+        get() = progressMutableLiveData
+
+    // TODO: Why function instead of get?
+    fun progress(): LiveData<Int> {
+        progressMutableLiveData.value = 0
+        return progressMutableLiveData
+    }
 
     private val playPauseButtonMutableLiveData = MutableLiveData<Int>()
     fun playPauseButton(): LiveData<Int> = playPauseButtonMutableLiveData
@@ -87,20 +95,20 @@ class PlayScreenViewModel(application: Application) : AndroidViewModel(applicati
         }
         songIndexMutableLiveData.postValue(newSongIndex)
         updateCurrentSong(songs, newSongIndex)
-
     }
 
     private fun sendSongChangedBroadcast(currentSong: Song) {
-        val intent = Intent(ACTION_SONG_CHANGED)
-        intent.putExtra(SONG_TITLE, currentSong.title)
-        intent.putExtra(SONG_URI, currentSong.songUri.toString())
-        intent.putExtra(ALBUM_ART_URI, currentSong.albumArtUri.toString())
+        val intent = Intent(ACTION_SONG_CHANGED).apply {
+            putExtra(SONG_TITLE, currentSong.title)
+            putExtra(SONG_URI, currentSong.songUri.toString())
+            putExtra(ALBUM_ART_URI, currentSong.albumArtUri.toString())
+        }
+
         LocalBroadcastManager.getInstance(getApplication()).sendBroadcast(intent)
     }
 
     private fun updateCurrentSong(songs: List<Song>, currentSongIndex: Int) {
-        val currentSong = songs.getOrNull(currentSongIndex)
-        currentSong?.let {
+        songs.getOrNull(currentSongIndex)?.let {
             currentSongMutableLiveData.postValue(it)
             sendSongChangedBroadcast(it)
         }
@@ -112,5 +120,4 @@ class PlayScreenViewModel(application: Application) : AndroidViewModel(applicati
         const val SONG_URI = "song_uri"
         const val ALBUM_ART_URI = "album_art_uri"
     }
-
 }

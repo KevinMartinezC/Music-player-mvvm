@@ -20,7 +20,8 @@ class SettingScreenViewModel(songRepository: SongRepository) : ViewModel() {
     val songs: LiveData<List<Song>> = _songs
 
     private val _deletedSongPosition = MutableLiveData<Int?>()
-    val deletedSongPosition: LiveData<Int?> get() = _deletedSongPosition
+    val deletedSongPosition: LiveData<Int?>
+        get() = _deletedSongPosition
 
     fun removeSongFromHomeScreen(position: Int) {
         _songs.value = _songs.value?.filterIndexed { index, _ -> index != position }
@@ -42,8 +43,10 @@ class SettingScreenViewModel(songRepository: SongRepository) : ViewModel() {
     }
 
     fun addNewSongs(newSongs: List<Song>) {
-        val nonDuplicateSongs =
-            newSongs.filter { newSong -> !_songs.value.orEmpty().contains(newSong) }
+        val nonDuplicateSongs = newSongs.filter { newSong ->
+            !_songs.value.orEmpty().contains(newSong)
+        }
+
         _songs.value = _songs.value.orEmpty() + nonDuplicateSongs
     }
 
