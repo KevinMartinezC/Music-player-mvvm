@@ -15,32 +15,29 @@ import com.example.music_player_mvvm.model.Song
 
 class PlayScreenViewModel(application: Application) : AndroidViewModel(application) {
 
-
     private val handler = Handler(Looper.getMainLooper())
 
     private val progressMutableLiveData = MutableLiveData<Int>()
-
-    private val progress2: LiveData<Int>
-        get() = progressMutableLiveData
-
-    // TODO: Why function instead of get?
-    fun progress(): LiveData<Int> {
-        progressMutableLiveData.value = 0
-        return progressMutableLiveData
-    }
+    val progress: LiveData<Int>
+        get() {
+            progressMutableLiveData.value = INITIAL_PROGRESS_VALUE
+            return progressMutableLiveData
+        }
 
     private val playPauseButtonMutableLiveData = MutableLiveData<Int>()
-    fun playPauseButton(): LiveData<Int> = playPauseButtonMutableLiveData
+    val playPauseButton: LiveData<Int>
+        get() = playPauseButtonMutableLiveData
 
     private val songIndexMutableLiveData = MutableLiveData<Int>()
-    fun songIndex(): LiveData<Int> = songIndexMutableLiveData
+    val songIndex: LiveData<Int>
+        get() = songIndexMutableLiveData
 
     private val currentSongMutableLiveData = MutableLiveData<Song>()
-    fun currentSong(): LiveData<Song> = currentSongMutableLiveData
+    val currentSong: LiveData<Song>
+        get() = currentSongMutableLiveData
 
     private val playbackPositionMutableLiveData = MutableLiveData<Int>()
     val playbackPositionLiveData: LiveData<Int> = playbackPositionMutableLiveData
-
 
     fun updatePlaybackPosition(position: Int) {
         playbackPositionMutableLiveData.postValue(position)
@@ -75,7 +72,7 @@ class PlayScreenViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun onPreviousButtonClick(songs: List<Song>) {
-        val currentSongIndex = songIndexMutableLiveData.value ?: 0
+        val currentSongIndex = songIndexMutableLiveData.value ?: INITIAL_INDEX
         val newSongIndex = if (currentSongIndex > 0) {
             currentSongIndex - 1
         } else {
@@ -87,11 +84,11 @@ class PlayScreenViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun onNextButtonClick(songs: List<Song>) {
-        val currentSongIndex = songIndexMutableLiveData.value ?: 0
+        val currentSongIndex = songIndexMutableLiveData.value ?: INITIAL_INDEX
         val newSongIndex = if (currentSongIndex < songs.size - 1) {
             currentSongIndex + 1
         } else {
-            0
+            INITIAL_INDEX
         }
         songIndexMutableLiveData.postValue(newSongIndex)
         updateCurrentSong(songs, newSongIndex)
@@ -119,5 +116,7 @@ class PlayScreenViewModel(application: Application) : AndroidViewModel(applicati
         const val SONG_TITLE = "song_title"
         const val SONG_URI = "song_uri"
         const val ALBUM_ART_URI = "album_art_uri"
+        const val INITIAL_PROGRESS_VALUE = 0
+        const val INITIAL_INDEX = 0
     }
 }

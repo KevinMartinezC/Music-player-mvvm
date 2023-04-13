@@ -12,7 +12,6 @@ object SongRepository {
     fun initialize(context: Context) {
         this.context = context
         val contentResolver = context.contentResolver
-        // TODO: Move to separate lines and use scope function.
         contentResolver.query(
             SongProvider.SONG_PROVIDER_URI,
             null,
@@ -26,7 +25,6 @@ object SongRepository {
     }
 
     fun getDefaultSongs(): List<Song> {
-        // TODO: Move to constant.
         return songs.take(InitialNumOfSongs)
     }
 }

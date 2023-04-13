@@ -23,7 +23,7 @@ class SettingScreenViewModel(songRepository: SongRepository) : ViewModel() {
     val deletedSongPosition: LiveData<Int?>
         get() = _deletedSongPosition
 
-    fun removeSongFromHomeScreen(position: Int) {
+    private fun removeSongFromHomeScreen(position: Int) {
         _songs.value = _songs.value?.filterIndexed { index, _ -> index != position }
     }
 
@@ -32,11 +32,9 @@ class SettingScreenViewModel(songRepository: SongRepository) : ViewModel() {
             ContentUris.withAppendedId(SONG_PROVIDER_URI, position.toLong())
         activity.contentResolver.delete(deleteUri, null, null)
 
-        // Notify observers of the deleted position
         _deletedSongPosition.value = position
         removeSongFromHomeScreen(position)
     }
-
 
     fun resetDeletedSongPosition() {
         _deletedSongPosition.postValue(null)
@@ -46,10 +44,8 @@ class SettingScreenViewModel(songRepository: SongRepository) : ViewModel() {
         val nonDuplicateSongs = newSongs.filter { newSong ->
             !_songs.value.orEmpty().contains(newSong)
         }
-
         _songs.value = _songs.value.orEmpty() + nonDuplicateSongs
     }
-
 
     fun fetchSongsFromProvider(activity: Activity): MutableList<Song> {
         val cursor = activity.contentResolver.query(

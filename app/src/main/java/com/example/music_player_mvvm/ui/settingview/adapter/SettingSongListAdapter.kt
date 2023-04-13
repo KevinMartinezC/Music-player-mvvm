@@ -39,23 +39,19 @@ class SettingSongListAdapter(
         ) {
             binding.songTitleTextView.text = song.title
 
-            // Update the item UI based on the song's selected state
             binding.root.setBackgroundColor(
                 if (song.selected) Color.parseColor("#E0E0E0")
                 else Color.TRANSPARENT
             )
 
-            // Load album art into the ImageView
             Glide.with(binding.albumArtImageView.context)
                 .load(song.albumArtUri)
                 .into(binding.albumArtImageView)
 
-            // Set click listener for the whole item
             itemView.setOnClickListener {
                 onSongClickListener(adapterPosition)
             }
 
-            // Set click listener for the delete button
             binding.deleteButton.setOnClickListener {
                 onDeleteClickListener(adapterPosition)
             }

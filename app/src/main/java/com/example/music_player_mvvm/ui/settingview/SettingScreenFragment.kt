@@ -1,7 +1,6 @@
 package com.example.music_player_mvvm.ui.settingview
 
 import android.content.ContentValues
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -45,10 +44,12 @@ class SettingScreenFragment : Fragment() {
         initViews()
         addNewSongsToProvider()
         loadSongsFromProvider()
+        deleteSongObserver()
+    }
 
+    private fun deleteSongObserver() {
         viewModel.deletedSongPosition.observe(viewLifecycleOwner) { position ->
             position?.let {
-                // Remove the song from the local list
                 songs.removeAt(it)
                 recyclerView.adapter?.notifyItemRemoved(it)
                 viewModel.resetDeletedSongPosition()
@@ -86,38 +87,27 @@ class SettingScreenFragment : Fragment() {
     }
 
     private fun onSongClick(position: Int) {
-        // Toggle the selected state of the song
         songs[position].selected = !songs[position].selected
-
         recyclerView.adapter?.notifyItemChanged(position)
     }
 
     private fun addSongs() {
-        // Add the selected songs to the shared ViewModel
         val selectedSongs = songs.filter { it.selected }
-
-        // Check if the song is already in the viewModel.songs list
         val nonDuplicateSongs = selectedSongs.filter { newSong ->
             !viewModel.songs.value.orEmpty().any { existingSong ->
                 existingSong.title == newSong.title
             }
         }
-
-        // Update the ViewModel
         viewModel.addNewSongs(nonDuplicateSongs)
 
-        // Insert the non-duplicate songs into the SongProvider
         for (song in nonDuplicateSongs) {
             val contentValues = ContentValues().apply {
                 put(SONG_NAME, song.title)
                 put(SONG_URI, song.songUri.toString())
                 put(ALBUM_ART_URI, song.albumArtUri.toString())
             }
-
             requireActivity().contentResolver.insert(SONG_PROVIDER_URI, contentValues)
         }
-
-        // Reset the selected state for all songs and notify the adapter of the change
         songs.forEachIndexed { index, song ->
             if (song.selected) {
                 song.selected = false
@@ -129,54 +119,22 @@ class SettingScreenFragment : Fragment() {
     private fun addNewSongsToProvider() {
 
         val newSongs = listOf(
-            Song(
-                SONG_NAME_FOUR,
-                Uri.parse("$URI_PATH${R.raw.song4}"),
-                Uri.parse("$URI_PATH${R.drawable.album_art_4}")
-            ),
-            Song(
-                SONG_NAME_FIVE,
-                Uri.parse("$URI_PATH${R.raw.song5}"),
-                Uri.parse("$URI_PATH${R.drawable.album_art_5}")
-            ),
-            Song(
-                SONG_NAME_SIX,
-                Uri.parse("$URI_PATH${R.raw.song6}"),
-                Uri.parse("$URI_PATH${R.drawable.album_art_6}")
-            ),
-            Song(
-                SONG_NAME_SEVEN,
-                Uri.parse("$URI_PATH${R.raw.song7}"),
-                Uri.parse("$URI_PATH${R.drawable.album_art_7}")
-            ),
-            Song(
-                SONG_NAME_EIGHT,
-                Uri.parse("$URI_PATH${R.raw.song8}"),
-                Uri.parse("$URI_PATH${R.drawable.album_art_8}")
-            ),
-            Song(
-                SONG_NAME_NINE,
-                Uri.parse("$URI_PATH${R.raw.song9}"),
-                Uri.parse("$URI_PATH${R.drawable.album_art_9}")
-            ),
-            Song(
-                SONG_NAME_TEN,
-                Uri.parse("$URI_PATH${R.raw.song10}"),
-                Uri.parse("$URI_PATH${R.drawable.album_art_10}")
-            ),
-            // Add the remaining three songs with their respective URIs
+            Song.create(SONG_NAME_FOUR, R.raw.song4, R.drawable.album_art_4),
+            Song.create(SONG_NAME_FIVE, R.raw.song5, R.drawable.album_art_5),
+            Song.create(SONG_NAME_SIX, R.raw.song6, R.drawable.album_art_6),
+            Song.create(SONG_NAME_SEVEN, R.raw.song7, R.drawable.album_art_7),
+            Song.create(SONG_NAME_EIGHT, R.raw.song8, R.drawable.album_art_8),
+            Song.create(SONG_NAME_NINE, R.raw.song9, R.drawable.album_art_9),
+            Song.create(SONG_NAME_TEN, R.raw.song10, R.drawable.album_art_10),
         )
-
         newSongs.forEach { song ->
             val contentValues = ContentValues().apply {
                 put(SONG_NAME, song.title)
                 put(SONG_URI, song.songUri.toString())
                 put(ALBUM_ART_URI, song.albumArtUri.toString())
             }
-
             requireActivity().contentResolver.insert(SONG_PROVIDER_URI, contentValues)
         }
-
         loadSongsFromProvider()
     }
 
@@ -196,6 +154,5 @@ class SettingScreenFragment : Fragment() {
         const val SONG_NAME = "song_name"
         const val SONG_URI = "song_uri"
         const val ALBUM_ART_URI = "album_art_uri"
-        const val URI_PATH = "android.resource://com.example.music_player_mvvm/"
     }
 }

@@ -7,14 +7,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.music_player_mvvm.model.Song
 import com.example.music_player_mvvm.model.SongContract
-import java.lang.Exception
 
 class HomeScreenViewModel : ViewModel() {
     private val songsMutableLiveData = MutableLiveData<List<Song>>()
     val songs: LiveData<List<Song>>
         get() = songsMutableLiveData
-
-    // TODO: Why function instead of val?
 
     fun loadSongsFromProvider(contentResolver: ContentResolver) {
         val songs = mutableListOf<Song>()

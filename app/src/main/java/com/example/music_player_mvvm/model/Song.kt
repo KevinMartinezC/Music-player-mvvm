@@ -2,7 +2,6 @@ package com.example.music_player_mvvm.model
 
 import android.net.Uri
 import androidx.annotation.DrawableRes
-import java.io.File
 
 data class Song(
     val title: String,
@@ -11,7 +10,6 @@ data class Song(
     var selected: Boolean = false,
 ) {
     companion object {
-
         fun create(
             name: String,
             songFile: Int,

@@ -17,19 +17,9 @@ class SongProvider : ContentProvider() {
     private val _deletedSongs = mutableSetOf<String>()
 
     private val _songs = mutableListOf(
-
-        // TODO: Repeat function, create a new function for that.
         Song.create(SONG_NAME_ONE, R.raw.song1, R.drawable.album_art_1),
-        Song(
-            SONG_NAME_TWO,
-            Uri.parse("${URI_PATH}${R.raw.song2}"),
-            Uri.parse("${URI_PATH}${R.drawable.album_art_2}")
-        ),
-        Song(
-            SONG_NAME_THREE,
-            Uri.parse("${URI_PATH}${R.raw.song3}"),
-            Uri.parse("${URI_PATH}${R.drawable.album_art_3}")
-        )
+        Song.create(SONG_NAME_TWO, R.raw.song2, R.drawable.album_art_2),
+        Song.create(SONG_NAME_THREE, R.raw.song3, R.drawable.album_art_3)
     )
 
     val songs: List<Song>
@@ -48,7 +38,7 @@ class SongProvider : ContentProvider() {
     ): Cursor {
         val matrixCursor = MatrixCursor(arrayOf(ID, SONG_NAME, SONG_URI, ALBUM_ART_URI))
         songs.forEachIndexed { index, song ->
-            // TODO: Readable comparison.
+
             val isSongAvailable = _deletedSongs.contains(song.title)
             if (!isSongAvailable) {
                 matrixCursor.addRow(
@@ -66,14 +56,13 @@ class SongProvider : ContentProvider() {
     }
 
     override fun insert(uri: Uri, values: ContentValues?): Uri {
-        // TODO: Update with requireNotNull
+
         requireNotNull(values) { "ContentValues cannot be null" }
 
         val title = values.getAsString(SONG_NAME)
         val songUri = Uri.parse(values.getAsString(SONG_URI))
         val albumArtUri = Uri.parse(values.getAsString(ALBUM_ART_URI))
 
-        // TODO: Use scope functions
         Song(title, songUri, albumArtUri).also(_songs::add)
 
         return ContentUris.withAppendedId(uri, (_songs.size - 1).toLong())
@@ -94,10 +83,8 @@ class SongProvider : ContentProvider() {
             _deletedSongs.add(_songs[id].title)
             _songs.removeAt(id)
             AffectedRow.OneLine.ordinal
-            // TODO: Create an enum for readability.
-
         } else {
-            0
+            AffectedRow.None.ordinal
         }
     }
 
@@ -107,8 +94,8 @@ class SongProvider : ContentProvider() {
 
     companion object {
         const val SONG_NAME_ONE = "Bar Liar"
-        const val SONG_NAME_TWO: String = "Girls Like You"
-        const val SONG_NAME_THREE: String = "See You Again"
+        const val SONG_NAME_TWO = "Girls Like You"
+        const val SONG_NAME_THREE = "See You Again"
         private const val AUTHORITY = "com.example.music_player_mvvm.provider"
         const val URI_PATH = "android.resource://com.example.music_player_mvvm/"
         const val ID = "_id"
@@ -127,12 +114,10 @@ class SongProvider : ContentProvider() {
             if (nameColumnIndex == -1 || songUriColumnIndex == -1 || albumArtUriColumnIndex == -1) {
                 return emptyList()
             }
-
             while (cursor.moveToNext()) {
                 val title = cursor.getString(nameColumnIndex)
                 val songUri = Uri.parse(cursor.getString(songUriColumnIndex))
                 val albumArtUri = Uri.parse(cursor.getString(albumArtUriColumnIndex))
-
                 val song = Song(title, songUri, albumArtUri)
                 songs.add(song)
             }
