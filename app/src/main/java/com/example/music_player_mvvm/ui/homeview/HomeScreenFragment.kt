@@ -27,9 +27,9 @@ import com.example.music_player_mvvm.ui.playerview.PlayScreenFragment.Companion.
 
 
 class HomeScreenFragment : Fragment() {
+    private lateinit var viewModel: HomeScreenViewModel
 
-    private var defaultSongs: List<Song> = listOf()
-    private val viewModel: HomeScreenViewModel by viewModels()
+    //private val viewModel: HomeScreenViewModel by viewModels()
     private val sharedViewModel: SettingScreenViewModel by activityViewModels {
         CustomViewModelFactory(SongRepository)
     }
@@ -52,13 +52,10 @@ class HomeScreenFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         SongRepository.initialize(requireActivity())
 
         initViews()
-
-        viewModel.loadSongsFromProvider(requireActivity().contentResolver)
-        defaultSongs = SongRepository.getDefaultSongs()
-
         addSongs()
         observeDeletedSongs()
     }

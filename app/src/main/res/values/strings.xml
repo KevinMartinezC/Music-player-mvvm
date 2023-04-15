@@ -6,7 +6,6 @@
     <string name="play_or_pause_the_song_button">Stop the Track</string>
     <string name="go_to_the_next_song_button">Go to the next song</string>
     <string name="add_song">Add songs into the list</string>
-    <string name="settings">Settings</string>
     <string name="settingscreenfragment">SettingScreenFragment</string>
     <string name="error_reading_song_data_from_provider">Error reading song data from provider: %1$s</string>
     <string name="song_changed">Song changed: %1$s</string>
@@ -17,5 +16,10 @@
     <string name="settings_button_description">Open settings</string>
     <string name="random_button_description">Playing a random song\n</string>
     <string name="play_button_description">Play from the first song</string>
+    <string name="settings">Settings</string>
+    <string name="random_song">Random Song</string>
+    <string name="play_first_song">Play First Song</string>
+    <string name="album_art">Album Art</string>
+
 
 </resources>
