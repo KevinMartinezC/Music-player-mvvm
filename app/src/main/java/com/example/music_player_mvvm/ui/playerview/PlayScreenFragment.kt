@@ -27,47 +27,31 @@ import com.example.music_player_mvvm.ui.playerview.viewmodel.PlayScreenViewModel
 
 
 class PlayScreenFragment : Fragment() {
-    private lateinit var viewmodel: PlayScreenViewModel
+    private lateinit var viewModel: PlayScreenViewModel
 
     private var _binding: FragmentPlayScreenBinding? = null
     private val binding get() = _binding!!
     private lateinit var songs: List<Song>
-    var currentSongIndex: Int = 0
-    var playbackPositionBeforeTransition: Int = 0
+
+    var currentSongIndex: Int = VALOR_INITIAL_INDEX
+    var playbackPositionBeforeTransition: Int = INITIAL_PLAYBACK_POSITION
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val viewmodel: PlayScreenViewModel by viewModels {
+        val viewModel: PlayScreenViewModel by viewModels {
             PlayScreenViewModelFactory(requireActivity().application)
         }
+        this.viewModel = viewModel
 
-        this.viewmodel = viewmodel
-
-        viewmodel.progress().observe(this) {
-            binding.seekBar.progress = it
-        }
-
-        viewmodel.playPauseButton().observe(this) { buttonDrawable ->
-            binding.playPauseButton.setImageResource(buttonDrawable)
-        }
-
-        viewmodel.songIndex().observe(this) { newIndex ->
-            currentSongIndex = newIndex
-            playSong()
-        }
-
-        viewmodel.currentSong().observe(this) { currentSong ->
-            updateSongInfo(currentSong)
-        }
+        setupObservers()
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         _binding = FragmentPlayScreenBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -75,47 +59,32 @@ class PlayScreenFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
         songs = SongRepository.songs
         setupButtonClickListeners()
         initSongInfo()
         setupSeekBarChangeListener()
         setupMotionLayoutTransitionListener()
+        observerPlaybackPosition()
+    }
 
-        viewmodel.playbackPositionLiveData.observe(viewLifecycleOwner) { position ->
+    private fun observerPlaybackPosition() {
+        viewModel.playbackPositionLiveData.observe(viewLifecycleOwner) { position ->
             MediaPlayerHolder.mediaPlayer?.seekTo(position)
         }
     }
 
     override fun onStop() {
         super.onStop()
-        MediaPlayerHolder.mediaPlayer.let { mediaPlayer ->
-            if (mediaPlayer != null) {
-                viewmodel.updatePlaybackPosition(mediaPlayer.currentPosition)
-            }
-        }
-    }
-
-    private val songChangedReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent != null && intent.action == PlayScreenViewModel.ACTION_SONG_CHANGED) {
-                val songTitle = intent.getStringExtra(SONG_TITLE) ?: ""
-                val songUri = Uri.parse(intent.getStringExtra(SONG_URI) ?: "")
-                val albumArtUri = Uri.parse(intent.getStringExtra(ALBUM_ART_URI) ?: "")
-                val song = Song(songTitle, songUri, albumArtUri)
-                updateSongInfo(song)
-
-                context?.let {
-                    Toast.makeText(it,
-                        getString(R.string.song_changed, songTitle), Toast.LENGTH_SHORT).show()
-                }
-            }
+        MediaPlayerHolder.mediaPlayer?.let { mediaPlayer ->
+            viewModel.updatePlaybackPosition(mediaPlayer.currentPosition)
         }
     }
 
     override fun onResume() {
         super.onResume()
         val filter = IntentFilter(PlayScreenViewModel.ACTION_SONG_CHANGED)
+
+        // TODO: It could be a pattern
         LocalBroadcastManager.getInstance(requireContext())
             .registerReceiver(songChangedReceiver, filter)
     }
@@ -125,18 +94,59 @@ class PlayScreenFragment : Fragment() {
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(songChangedReceiver)
     }
 
-    private fun setupButtonClickListeners() {
-        binding.playPauseButton.setOnClickListener { viewmodel.onPlayPauseButtonClick() }
-        binding.previousButton.setOnClickListener { viewmodel.onPreviousButtonClick(songs) }
-        binding.nextButton.setOnClickListener { viewmodel.onNextButtonClick(songs) }
-        binding.settingsButton.setOnClickListener {
+
+    private fun setupObservers() {
+        viewModel.progress.observe(this) { progress ->
+            binding.seekBar.progress = progress
+        }
+
+        viewModel.playPauseButton.observe(this) { buttonDrawable ->
+            binding.playPauseButton.setImageResource(buttonDrawable)
+        }
+
+        viewModel.songIndex.observe(this) { newIndex ->
+            currentSongIndex = newIndex
+            playSong()
+        }
+
+        viewModel.currentSong.observe(this) { currentSong ->
+            updateSongInfo(currentSong)
+        }
+
+    }
+
+    private fun setupButtonClickListeners() = with(binding) {
+        playPauseButton.setOnClickListener { viewModel.onPlayPauseButtonClick() }
+        previousButton.setOnClickListener { viewModel.onPreviousButtonClick(songs) }
+        nextButton.setOnClickListener { viewModel.onNextButtonClick(songs) }
+        settingsButton.setOnClickListener {
             findNavController().navigate(R.id.action_playScreenFragment_to_settingScreenFragment)
         }
     }
 
+    private val songChangedReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            intent?.takeIf { it.action == PlayScreenViewModel.ACTION_SONG_CHANGED }?.let {
+                val songTitle = it.getStringExtra(SONG_TITLE).orEmpty()
+                val songUri = Uri.parse(it.getStringExtra(SONG_URI).orEmpty())
+                val albumArtUri = Uri.parse(it.getStringExtra(ALBUM_ART_URI).orEmpty())
+                val song = Song(songTitle, songUri, albumArtUri)
+                updateSongInfo(song)
+                context?.showSongChangedToast(songTitle)
+            }
+        }
+    }
+
+    private fun Context.showSongChangedToast(songTitle: String) {
+        Toast.makeText(
+            this,
+            getString(R.string.song_changed, songTitle), Toast.LENGTH_SHORT
+        ).show()
+    }
+
     private fun initSongInfo() {
         val args = arguments
-        val songTitle = args?.getString(SONG_TITLE_KEY) ?: ""
+        val songTitle = args?.getString(SONG_TITLE_KEY).orEmpty()
         binding.songTitleTextView.text = songTitle
         currentSongIndex = songs.indexOfFirst { it.title == songTitle }
         binding.albumArtImageView.setImageURI(
@@ -146,7 +156,7 @@ class PlayScreenFragment : Fragment() {
     }
 
     private fun playSong() {
-        viewmodel.playSong()
+        viewModel.playSong()
 
         MediaPlayerHolder.mediaPlayer?.let { mediaPlayer ->
             if (mediaPlayer.isPlaying) {
@@ -158,11 +168,10 @@ class PlayScreenFragment : Fragment() {
             mediaPlayer.prepare()
             mediaPlayer.start()
             binding.seekBar.max = mediaPlayer.duration
-            // handler.postDelayed(updateSeekBar, 1000)
             binding.playPauseButton.setImageResource(android.R.drawable.ic_media_pause)
         }
     }
-    
+
     private fun updateSongInfo(song: Song) {
         binding.songTitleTextView.text = song.title
         Glide.with(this).load(song.albumArtUri).into(binding.albumArtImageView)
@@ -183,25 +192,9 @@ class PlayScreenFragment : Fragment() {
 
     private fun setupMotionLayoutTransitionListener() {
         val motionLayout = binding.motionLayout
-        motionLayout.setTransitionListener(object : MotionLayout.TransitionListener {
-            override fun onTransitionStarted(
-                motionLayout: MotionLayout?,
-                startId: Int,
-                endId: Int
-            ) {
-            }
-
-            override fun onTransitionChange(
-                motionLayout: MotionLayout?,
-                startId: Int,
-                endId: Int,
-                progress: Float
-            ) {
-            }
-
+        motionLayout.setTransitionListener(object : MotionTransition {
             override fun onTransitionCompleted(motionLayout: MotionLayout?, currentId: Int) {
                 MediaPlayerHolder.mediaPlayer?.let { mediaPlayer ->
-                    // Store the current position before stopping the MediaPlayer
                     playbackPositionBeforeTransition = mediaPlayer.currentPosition
                     mediaPlayer.stop()
                     mediaPlayer.reset()
@@ -210,30 +203,48 @@ class PlayScreenFragment : Fragment() {
 
                     mediaPlayer.setDataSource(requireContext(), songUri)
                     mediaPlayer.prepare()
-                    // Seek to the position before the transition
                     mediaPlayer.seekTo(playbackPositionBeforeTransition)
                     mediaPlayer.start()
                     binding.seekBar.max = mediaPlayer.duration
-                    //  handler.postDelayed(updateSeekBar, 1000)
                     binding.playPauseButton.setImageResource(android.R.drawable.ic_media_pause)
-
                 }
-            }
-
-            override fun onTransitionTrigger(
-                motionLayout: MotionLayout?,
-                triggerId: Int,
-                positive: Boolean,
-                progress: Float
-            ) {
             }
         })
     }
 
     companion object {
-        const val SONG_TITLE_KEY: String = "songTitle"
+        const val SONG_TITLE_KEY = "songTitle"
         const val SONG_TITLE = "song_title"
         const val SONG_URI = "song_uri"
         const val ALBUM_ART_URI = "album_art_uri"
+        const val VALOR_INITIAL_INDEX = 0
+        const val INITIAL_PLAYBACK_POSITION = 0
+    }
+}
+interface MotionTransition : MotionLayout.TransitionListener {
+    override fun onTransitionStarted(
+        motionLayout: MotionLayout?,
+        startId: Int,
+        endId: Int
+    ) {
+        /** Default Implementation **/
+    }
+
+    override fun onTransitionChange(
+        motionLayout: MotionLayout?,
+        startId: Int,
+        endId: Int,
+        progress: Float
+    ) {
+        /** Default Implementation **/
+    }
+
+    override fun onTransitionTrigger(
+        motionLayout: MotionLayout?,
+        triggerId: Int,
+        positive: Boolean,
+        progress: Float
+    ) {
+        /** Default Implementation **/
     }
 }

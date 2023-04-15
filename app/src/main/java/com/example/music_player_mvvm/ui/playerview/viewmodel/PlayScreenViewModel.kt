@@ -15,24 +15,29 @@ import com.example.music_player_mvvm.model.Song
 
 class PlayScreenViewModel(application: Application) : AndroidViewModel(application) {
 
-
     private val handler = Handler(Looper.getMainLooper())
 
     private val progressMutableLiveData = MutableLiveData<Int>()
-    fun progress(): LiveData<Int> = progressMutableLiveData
+    val progress: LiveData<Int>
+        get() {
+            progressMutableLiveData.value = INITIAL_PROGRESS_VALUE
+            return progressMutableLiveData
+        }
 
     private val playPauseButtonMutableLiveData = MutableLiveData<Int>()
-    fun playPauseButton(): LiveData<Int> = playPauseButtonMutableLiveData
+    val playPauseButton: LiveData<Int>
+        get() = playPauseButtonMutableLiveData
 
     private val songIndexMutableLiveData = MutableLiveData<Int>()
-    fun songIndex(): LiveData<Int> = songIndexMutableLiveData
+    val songIndex: LiveData<Int>
+        get() = songIndexMutableLiveData
 
     private val currentSongMutableLiveData = MutableLiveData<Song>()
-    fun currentSong(): LiveData<Song> = currentSongMutableLiveData
+    val currentSong: LiveData<Song>
+        get() = currentSongMutableLiveData
 
     private val playbackPositionMutableLiveData = MutableLiveData<Int>()
     val playbackPositionLiveData: LiveData<Int> = playbackPositionMutableLiveData
-
 
     fun updatePlaybackPosition(position: Int) {
         playbackPositionMutableLiveData.postValue(position)
@@ -67,7 +72,7 @@ class PlayScreenViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun onPreviousButtonClick(songs: List<Song>) {
-        val currentSongIndex = songIndexMutableLiveData.value ?: 0
+        val currentSongIndex = songIndexMutableLiveData.value ?: INITIAL_INDEX
         val newSongIndex = if (currentSongIndex > 0) {
             currentSongIndex - 1
         } else {
@@ -79,28 +84,28 @@ class PlayScreenViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun onNextButtonClick(songs: List<Song>) {
-        val currentSongIndex = songIndexMutableLiveData.value ?: 0
+        val currentSongIndex = songIndexMutableLiveData.value ?: INITIAL_INDEX
         val newSongIndex = if (currentSongIndex < songs.size - 1) {
             currentSongIndex + 1
         } else {
-            0
+            INITIAL_INDEX
         }
         songIndexMutableLiveData.postValue(newSongIndex)
         updateCurrentSong(songs, newSongIndex)
-
     }
 
     private fun sendSongChangedBroadcast(currentSong: Song) {
-        val intent = Intent(ACTION_SONG_CHANGED)
-        intent.putExtra(SONG_TITLE, currentSong.title)
-        intent.putExtra(SONG_URI, currentSong.songUri.toString())
-        intent.putExtra(ALBUM_ART_URI, currentSong.albumArtUri.toString())
+        val intent = Intent(ACTION_SONG_CHANGED).apply {
+            putExtra(SONG_TITLE, currentSong.title)
+            putExtra(SONG_URI, currentSong.songUri.toString())
+            putExtra(ALBUM_ART_URI, currentSong.albumArtUri.toString())
+        }
+
         LocalBroadcastManager.getInstance(getApplication()).sendBroadcast(intent)
     }
 
     private fun updateCurrentSong(songs: List<Song>, currentSongIndex: Int) {
-        val currentSong = songs.getOrNull(currentSongIndex)
-        currentSong?.let {
+        songs.getOrNull(currentSongIndex)?.let {
             currentSongMutableLiveData.postValue(it)
             sendSongChangedBroadcast(it)
         }
@@ -111,6 +116,7 @@ class PlayScreenViewModel(application: Application) : AndroidViewModel(applicati
         const val SONG_TITLE = "song_title"
         const val SONG_URI = "song_uri"
         const val ALBUM_ART_URI = "album_art_uri"
+        const val INITIAL_PROGRESS_VALUE = 0
+        const val INITIAL_INDEX = 0
     }
-
 }

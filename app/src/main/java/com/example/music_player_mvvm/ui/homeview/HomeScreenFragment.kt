@@ -23,17 +23,20 @@ import com.example.music_player_mvvm.ui.homeview.viewmodel.HomeScreenViewModel
 import com.example.music_player_mvvm.ui.settingview.viewmodel.SettingScreenViewModel
 import com.example.music_player_mvvm.ui.settingview.viewmodel.CustomViewModelFactory
 import com.example.music_player_mvvm.ui.playerview.PlayScreenFragment
+import com.example.music_player_mvvm.ui.playerview.PlayScreenFragment.Companion.VALOR_INITIAL_INDEX
 
 
 class HomeScreenFragment : Fragment() {
-    private var defaultSongs: List<Song> = listOf()
 
-    private val viewmodel: HomeScreenViewModel by viewModels()
+    private var defaultSongs: List<Song> = listOf()
+    private val viewModel: HomeScreenViewModel by viewModels()
     private val sharedViewModel: SettingScreenViewModel by activityViewModels {
         CustomViewModelFactory(SongRepository)
     }
 
-    private var currentSongIndex: Int = 0
+    // TODO: Move to constant
+
+    private var currentSongIndex: Int = VALOR_INITIAL_INDEX
     private lateinit var recyclerView: RecyclerView
     private var songs: MutableList<Song> = mutableListOf()
     private var _binding: FragmentHomeScreenBinding? = null
@@ -53,21 +56,27 @@ class HomeScreenFragment : Fragment() {
 
         initViews()
 
-        viewmodel.loadSongsFromProvider(requireActivity().contentResolver)
+        viewModel.loadSongsFromProvider(requireActivity().contentResolver)
         defaultSongs = SongRepository.getDefaultSongs()
 
-        sharedViewModel.songs.observe(viewLifecycleOwner) { newSongs ->
-            songs = newSongs.toMutableList()
-            setupRecyclerView()
-        }
+        addSongs()
+        observeDeletedSongs()
+    }
 
-        // Observe the deleted song position
+    private fun observeDeletedSongs() {
         sharedViewModel.deletedSongPosition.observe(viewLifecycleOwner) { position ->
             position?.let {
                 // Remove the song from the local list
                 songs.removeAt(it)
                 recyclerView.adapter?.notifyItemRemoved(it)
             }
+        }
+    }
+
+    private fun addSongs() {
+        sharedViewModel.songs.observe(viewLifecycleOwner) { newSongs ->
+            songs = newSongs.toMutableList()
+            setupRecyclerView()
         }
     }
 
@@ -90,15 +99,11 @@ class HomeScreenFragment : Fragment() {
 
     private fun playPlaylist() {
         if (songs.isNotEmpty()) {
-            currentSongIndex = 0 // Always set the index to the first song
+            currentSongIndex = 0
             playSelectedSong(currentSongIndex)
             navigateToDetailActivity(currentSongIndex)
         } else {
-            Toast.makeText(
-                context,
-                getString(R.string.no_songs_in_the_playlist),
-                Toast.LENGTH_SHORT
-            ).show()
+            showNoSongsToast()
         }
     }
 
@@ -108,8 +113,14 @@ class HomeScreenFragment : Fragment() {
             playSelectedSong(currentSongIndex)
             navigateToDetailActivity(currentSongIndex)
         } else {
+            showNoSongsToast()
+        }
+    }
+
+    private fun showNoSongsToast() {
+        context?.let { ctx ->
             Toast.makeText(
-                context,
+                ctx,
                 getString(R.string.no_songs_in_the_playlist),
                 Toast.LENGTH_SHORT
             ).show()
@@ -143,11 +154,9 @@ class HomeScreenFragment : Fragment() {
     }
 
     private fun navigateToDetailActivity(position: Int) {
-        // Create a bundle to pass the song title
         val bundle = Bundle().apply {
             putString(PlayScreenFragment.SONG_TITLE_KEY, songs[position].title)
         }
-        // Navigate to the PlayScreenFragment with the bundle
         findNavController().navigate(R.id.action_homeScreenFragment_to_playScreenFragment, bundle)
     }
 }

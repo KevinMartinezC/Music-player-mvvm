@@ -5,20 +5,26 @@ import android.content.Context
 
 @SuppressLint("StaticFieldLeak")
 object SongRepository {
+    private const val InitialNumOfSongs = 3
     private lateinit var context: Context
     var songs: List<Song> = listOf()
 
     fun initialize(context: Context) {
         this.context = context
         val contentResolver = context.contentResolver
-        val cursor = contentResolver.query(SongProvider.SONG_PROVIDER_URI, null, null, null, null)
-        if (cursor != null) {
-            songs = SongProvider.getSongsFromCursor(cursor)
-            cursor.close()
+        contentResolver.query(
+            SongProvider.SONG_PROVIDER_URI,
+            null,
+            null,
+            null,
+            null
+        )?.let {
+            songs = SongProvider.getSongsFromCursor(it)
+            it.close()
         }
     }
 
     fun getDefaultSongs(): List<Song> {
-        return songs.take(3)
+        return songs.take(InitialNumOfSongs)
     }
 }
